@@ -110,7 +110,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>vn.websosanh.sparkexample.example</mainClass>
+							<mainClass>vn.websosanh.sparkexample.JavaDemo</mainClass>
 							<classpathPrefix>dependency-jars/</classpathPrefix>
 						</manifest>
 					</archive>

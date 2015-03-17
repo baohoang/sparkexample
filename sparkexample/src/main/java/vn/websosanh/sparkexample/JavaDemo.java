@@ -224,15 +224,15 @@ public class JavaDemo implements Serializable {
     }
  
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Syntax: com.datastax.spark.demo.JavaDemo <Spark Master URL> <Cassandra contact point>");
+        if (args.length != 1) {
+            System.err.println("Syntax: com.datastax.spark.demo.JavaDemo <Cassandra contact point>");
             System.exit(1);
         }
  
         SparkConf conf = new SparkConf();
         conf.setAppName("Java API demo");
-        conf.setMaster(args[0]);
-        conf.set("spark.cassandra.connection.host", args[1]);
+//        conf.setMaster(args[0]);
+        conf.set("spark.cassandra.connection.host", args[0]);
  
         JavaDemo app = new JavaDemo(conf);
         app.run();
