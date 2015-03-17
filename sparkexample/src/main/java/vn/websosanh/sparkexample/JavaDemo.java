@@ -83,7 +83,7 @@ public class JavaDemo implements Serializable {
  
         JavaRDD<Product> productsRDD = sc.parallelize(products);
         javaFunctions(productsRDD).writerBuilder("java_api", "products", mapToRow(Product.class)).saveToCassandra();
-        
+        logger.info("save products complete");
         
         JavaRDD<Sale> salesRDD = productsRDD.filter(new Function<Product, Boolean>() {
             /**
