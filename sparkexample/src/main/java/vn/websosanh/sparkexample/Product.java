@@ -2,7 +2,6 @@ package vn.websosanh.sparkexample;
 
 import java.io.Serializable;
 import java.text.MessageFormat;
-import java.util.List;
 
 public class Product implements Serializable {
     /**
@@ -11,14 +10,14 @@ public class Product implements Serializable {
 	private static final long serialVersionUID = -5838232291344432959L;
 	private Integer id;
     private String name;
-    private List<Integer> parents;
+    private Integer parent;
 
     public Product() { }
 
-    public Product(Integer id, String name, List<Integer> parents) {
+    public Product(Integer id, String name, Integer parent) {
         this.id = id;
         this.name = name;
-        this.parents = parents;
+        this.parent = parent;
     }
 
     public Integer getId() { return id; }
@@ -27,11 +26,11 @@ public class Product implements Serializable {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public List<Integer> getParents() { return parents; }
-    public void setParents(List<Integer> parents) { this.parents = parents; }
+    public Integer getParent() { return parent; }
+    public void setParents(Integer parent) { this.parent = parent; }
 
     @Override
     public String toString() {
-        return MessageFormat.format("Product'{'id={0}, name=''{1}'', parents={2}'}'", id, name, parents);
+        return MessageFormat.format("Product'{'id={0}, name=''{1}'', parents={2}'}'", id, name, parent);
     }
 }

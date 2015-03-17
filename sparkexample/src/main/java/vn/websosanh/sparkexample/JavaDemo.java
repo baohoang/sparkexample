@@ -62,23 +62,23 @@ public class JavaDemo implements Serializable {
         try (Session session = connector.openSession()) {
             session.execute("DROP KEYSPACE IF EXISTS java_api");
             session.execute("CREATE KEYSPACE java_api WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
-            session.execute("CREATE TABLE java_api.products (id INT PRIMARY KEY, name TEXT, parents LIST<INT>)");
+            session.execute("CREATE TABLE java_api.products (id INT PRIMARY KEY, name TEXT, parent INT)");
             session.execute("CREATE TABLE java_api.sales (id UUID PRIMARY KEY, product INT, price DECIMAL)");
             session.execute("CREATE TABLE java_api.summaries (product INT PRIMARY KEY, summary DECIMAL)");
         }
  
         // Prepare the products hierarchy
         List<Product> products = Arrays.asList(
-                new Product(0, "All products", Collections.<Integer>emptyList()),
-                new Product(1, "Product A", Arrays.asList(0)),
-                new Product(4, "Product A1", Arrays.asList(0, 1)),
-                new Product(5, "Product A2", Arrays.asList(0, 1)),
-                new Product(2, "Product B", Arrays.asList(0)),
-                new Product(6, "Product B1", Arrays.asList(0, 2)),
-                new Product(7, "Product B2", Arrays.asList(0, 2)),
-                new Product(3, "Product C", Arrays.asList(0)),
-                new Product(8, "Product C1", Arrays.asList(0, 3)),
-                new Product(9, "Product C2", Arrays.asList(0, 3))
+                new Product(0, "All products", -1),
+                new Product(1, "Product A", 1),
+                new Product(4, "Product A1", 2),
+                new Product(5, "Product A2", 2),
+                new Product(2, "Product B", 1),
+                new Product(6, "Product B1", 2),
+                new Product(7, "Product B2", 2),
+                new Product(3, "Product C", 1),
+                new Product(8, "Product C1", 2),
+                new Product(9, "Product C2", 2)
         );
  
         JavaRDD<Product> productsRDD = sc.parallelize(products);
@@ -92,7 +92,7 @@ public class JavaDemo implements Serializable {
 			private static final long serialVersionUID = 1L;
 
 			public Boolean call(Product product) throws Exception {
-                return product.getParents().size() == 2;
+                return product.getParent() == 2;
             }
         }).flatMap(new FlatMapFunction<Product, Sale>() {
             /**
@@ -153,11 +153,11 @@ public class JavaDemo implements Serializable {
 
 			public Iterable<Tuple2<Integer, BigDecimal>> call(Tuple2<Integer, Tuple2<Sale, Product>> input) throws Exception {
                 Tuple2<Sale, Product> saleWithProduct = input._2();
-                List<Tuple2<Integer, BigDecimal>> allSales = new ArrayList<>(saleWithProduct._2().getParents().size() + 1);
-                allSales.add(new Tuple2<>(saleWithProduct._1().getProduct(), saleWithProduct._1().getPrice()));
-                for (Integer parentProduct : saleWithProduct._2().getParents()) {
-                    allSales.add(new Tuple2<>(parentProduct, saleWithProduct._1().getPrice()));
-                }
+                List<Tuple2<Integer, BigDecimal>> allSales = new ArrayList<>(saleWithProduct._2().getParent() + 1);
+//                allSales.add(new Tuple2<>(saleWithProduct._1().getProduct(), saleWithProduct._1().getPrice()));
+//                for (Integer parentProduct : saleWithProduct._2().getParents()) {
+//                    allSales.add(new Tuple2<>(parentProduct, saleWithProduct._1().getPrice()));
+//                }
                 return allSales;
             }
         });
