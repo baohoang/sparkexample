@@ -61,7 +61,7 @@ public class JavaDemo implements Serializable {
 		try (Session session = connector.openSession()) {
 			session.execute("DROP KEYSPACE IF EXISTS java_api");
 			session.execute("CREATE KEYSPACE java_api WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
-			session.execute("CREATE TABLE java_api.products (id INT PRIMARY KEY, name TEXT, parent INT)");
+			session.execute("CREATE TABLE java_api.products (id INT PRIMARY KEY, name TEXT, parents TEXT)");
 			session.execute("CREATE TABLE java_api.sales (id UUID PRIMARY KEY, product INT, price DECIMAL)");
 			session.execute("CREATE TABLE java_api.summaries (product INT PRIMARY KEY, summary DECIMAL)");
 		}
