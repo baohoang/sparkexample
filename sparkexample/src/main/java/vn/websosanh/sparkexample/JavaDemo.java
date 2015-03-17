@@ -58,6 +58,7 @@ public class JavaDemo implements Serializable {
         CassandraConnector connector = CassandraConnector.apply(sc.getConf());
  
         // Prepare the schema
+        logger.info("create table ..");
         try (Session session = connector.openSession()) {
             session.execute("DROP KEYSPACE IF EXISTS java_api");
             session.execute("CREATE KEYSPACE java_api WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}");
