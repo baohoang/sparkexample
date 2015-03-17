@@ -11,10 +11,13 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import scala.Tuple2;
 
 public class example {
+	private static final Logger logger = LogManager.getLogger(example.class);
 	public static void main(String args[]){
 		  final Pattern SPACE = Pattern.compile(" ");
 		SparkConf sparkConf = new SparkConf().setAppName("JavaWordCount");
@@ -54,7 +57,7 @@ public class example {
 	      });
 		List<Tuple2<String, Integer>> output = counts.collect();
 	    for (Tuple2<?,?> tuple : output) {
-	      System.out.println(tuple._1() + ": " + tuple._2());
+	      logger.info(tuple._1() + ": " + tuple._2());
 	    }
 	    ctx.stop();
 	}
