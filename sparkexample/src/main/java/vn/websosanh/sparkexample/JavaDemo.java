@@ -27,9 +27,10 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
 import com.datastax.driver.core.Session;
-import com.datastax.spark.connector.cql.CassandraConnector;
 import com.datastax.spark.connector.japi.CassandraRow;
+import com.datastax.spark.connector.cql.CassandraConnector;
 import com.datastax.spark.connector.japi.RDDAndDStreamCommonJavaFunctions.WriterBuilder;
+import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
 import com.google.common.base.Optional;
 
 public class JavaDemo implements Serializable {
@@ -62,20 +63,8 @@ public class JavaDemo implements Serializable {
 	}
 	
 	private void createSimpleExample(JavaSparkContext sc){
-		JavaRDD<String> idRdd=javaFunctions(sc).cassandraTable("java_api", "products").map(new Function<CassandraRow, String>() {
-
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String call(CassandraRow v1) throws Exception {
-				// TODO Auto-generated method stub
-				return v1.toString();
-			}
-		});
-		System.out.println("Data as CassandraRows: \n" + StringUtils.join(idRdd.toArray(), "\n"));
+		JavaRDD<Product> idRdd=javaFunctions(sc).cassandraTable("java_api", "products",mapRowTo(Product.class));
+		System.out.println("Data as CassandraRows: \n" + idRdd.count());
 	}
 
 	private void generateData(JavaSparkContext sc) {
