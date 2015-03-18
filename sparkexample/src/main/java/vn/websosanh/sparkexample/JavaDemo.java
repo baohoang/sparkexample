@@ -43,6 +43,9 @@ public class JavaDemo implements Serializable {
 	}
 
 	private void run() {
+		conf.setJars(new String[] {
+				"/home/hdspark/spark/lib/spark-cassandra-connector-java_2.10-1.2.0-SNAPSHOT.jar",
+				"/home/hdspark/spark/lib/spark-cassandra-connector_2.10-1.2.0-SNAPSHOT.jar" });
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		logger.info("generateData  ...");
 		generateData(sc);
@@ -79,10 +82,10 @@ public class JavaDemo implements Serializable {
 
 		JavaRDD<Product> productsRDD = sc.parallelize(products);
 		logger.info("parallelize");
-		WriterBuilder wb=javaFunctions(productsRDD).writerBuilder("java_api", "products",
-				mapToRow(Product.class));
+		WriterBuilder wb = javaFunctions(productsRDD).writerBuilder("java_api",
+				"products", mapToRow(Product.class));
 		logger.info("writerBuild");
-		wb.withConnector(connector).saveToCassandra();
+		wb.saveToCassandra();
 		logger.info("save products complete");
 
 		JavaRDD<Sale> salesRDD = productsRDD.filter(
