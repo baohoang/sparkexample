@@ -42,8 +42,8 @@ public class Product implements Serializable {
 		return parents;
 	}
 
-	public void setParent(String parent) {
-		this.parents = parent;
+	public void setParents(String parents) {
+		this.parents = parents;
 	}
 
 	@Override
