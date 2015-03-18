@@ -49,8 +49,8 @@ public class JavaDemo implements Serializable {
 
 	private void run() {
 		conf.setJars(new String[] {
-				"/home/hdspark/spark/lib/spark-cassandra-connector-java_2.10-1.2.0-SNAPSHOT.jar",
-				"/home/hdspark/spark/lib/spark-cassandra-connector_2.10-1.2.0-SNAPSHOT.jar" });
+				"/home/hdspark/spark-cassandra/spark-cassandra-connector_2.10-1.2.0-alpha3.jar",
+				"/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar" });
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		logger.info("create");
 		createSimpleExample(sc);
