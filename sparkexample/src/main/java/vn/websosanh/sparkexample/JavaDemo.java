@@ -257,7 +257,7 @@ public class JavaDemo implements Serializable {
 		conf.set("spark.serializer",
 				"org.apache.spark.serializer.KryoSerializer");
 		conf.set("spark.kryo.registrator",
-				"com.datastax.killrweather.KillrKryoRegistrator");
+				"vn.websosanh.sparkexample.Product");
 		JavaDemo app = new JavaDemo(conf);
 		app.run();
 	}
