@@ -50,26 +50,28 @@ public class JavaDemo implements Serializable {
 	private void run() {
 		conf.setJars(new String[] {
 				"/home/hdspark/spark-cassandra/spark-cassandra-connector_2.10-1.2.0-alpha3.jar",
-				"/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar" });
+				"/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar",
+				"/home/hdspark/spark-cassandra/cassandra-driver-core-2.1.4.jar" });
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		logger.info("create");
 		createSimpleExample(sc);
-//		logger.info("generateData  ...");
-//		generateData(sc);
-//		logger.info("compute ... ");
-//		compute(sc);
-//		logger.info("showResult ...");
-//		showResults(sc);
-//		logger.info("Stopping ..");
+		// logger.info("generateData  ...");
+		// generateData(sc);
+		// logger.info("compute ... ");
+		// compute(sc);
+		// logger.info("showResult ...");
+		// showResults(sc);
+		// logger.info("Stopping ..");
 		sc.stop();
 	}
-	
-	private void createSimpleExample(JavaSparkContext sc){
-		JavaRDD<Product> idRdd=javaFunctions(sc).cassandraTable("java_api", "products",mapRowTo(Product.class));
-//		System.out.println("Data as CassandraRows: \n" + idRdd.count());
-//		Path out = new Path("/spark/sparkexample");
-//		FileSystem fs = FileSystem.get(conf);
-//		fs.delete(out, true);
+
+	private void createSimpleExample(JavaSparkContext sc) {
+		JavaRDD<Product> idRdd = javaFunctions(sc).cassandraTable("java_api",
+				"products", mapRowTo(Product.class));
+		// System.out.println("Data as CassandraRows: \n" + idRdd.count());
+		// Path out = new Path("/spark/sparkexample");
+		// FileSystem fs = FileSystem.get(conf);
+		// fs.delete(out, true);
 		idRdd.saveAsTextFile("/spark/sparkex1");
 	}
 
