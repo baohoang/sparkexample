@@ -254,8 +254,6 @@ public class JavaDemo implements Serializable {
 		conf.setAppName("Java API demo");
 		// conf.setMaster(args[0]);
 		conf.set("spark.cassandra.connection.host", args[0]);
-		conf.set("spark.serializer",
-				"org.apache.spark.serializer.KryoSerializer");
 		JavaDemo app = new JavaDemo(conf);
 		app.run();
 	}
