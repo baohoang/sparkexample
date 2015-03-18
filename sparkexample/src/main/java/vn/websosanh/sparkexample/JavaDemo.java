@@ -72,7 +72,7 @@ public class JavaDemo implements Serializable {
 		// Path out = new Path("/spark/sparkexample");
 		// FileSystem fs = FileSystem.get(conf);
 		// fs.delete(out, true);
-		idRdd.saveAsTextFile("/spark/sparkex1");
+		idRdd.saveAsTextFile("/spark/sparkex2");
 	}
 
 	private void generateData(JavaSparkContext sc) {
