@@ -94,46 +94,28 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-
-			<!-- Make this jar executable -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
+				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
-					<excludes>
-						<exclude>**/log4j.properties</exclude>
-					</excludes>
 					<archive>
 						<manifest>
-							<addClasspath>true</addClasspath>
 							<mainClass>vn.websosanh.sparkexample.JavaDemo</mainClass>
-							<classpathPrefix>dependency-jars/</classpathPrefix>
 						</manifest>
 					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
 				</configuration>
-			</plugin>
-
-			<!-- Copy project dependency -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.5.1</version>
 				<executions>
 					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
 						<goals>
-							<goal>copy-dependencies</goal>
+							<goal>single</goal>
 						</goals>
-						<configuration>
-							<!-- exclude junit, we need runtime dependency only -->
-							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>
