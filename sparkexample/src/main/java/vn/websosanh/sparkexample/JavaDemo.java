@@ -27,6 +27,7 @@ import scala.Tuple2;
 
 import com.datastax.driver.core.Session;
 import com.datastax.spark.connector.cql.CassandraConnector;
+import com.datastax.spark.connector.japi.RDDAndDStreamCommonJavaFunctions.WriterBuilder;
 import com.google.common.base.Optional;
 
 public class JavaDemo implements Serializable {
@@ -78,8 +79,10 @@ public class JavaDemo implements Serializable {
 
 		JavaRDD<Product> productsRDD = sc.parallelize(products);
 		logger.info("parallelize");
-		javaFunctions(productsRDD).writerBuilder("java_api", "products",
-				mapToRow(Product.class)).saveToCassandra();
+		WriterBuilder wb=javaFunctions(productsRDD).writerBuilder("java_api", "products",
+				mapToRow(Product.class));
+		logger.info("writerBuild");
+		wb.saveToCassandra();
 		logger.info("save products complete");
 
 		JavaRDD<Sale> salesRDD = productsRDD.filter(
