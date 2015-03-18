@@ -75,7 +75,7 @@ public class JavaDemo implements Serializable {
 				return v1.toString();
 			}
 		});
-		System.out.println("Data as CassandraRows: \n" + StringUtils.join(idRdd.toArray(), "\n"));
+		logger.info(idRdd.toString());
 	}
 
 	private void generateData(JavaSparkContext sc) {
