@@ -54,10 +54,10 @@ public class JavaDemo implements Serializable {
 		// "/home/hdspark/spark-cassandra/cassandra-driver-core-2.1.4.jar",
 		// "/home/hdspark/sparkexample/sparkexample/sparkexample/target/dependency-jars/*"});
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		logger.info("create");
-		createSimpleExample(sc);
-		// logger.info("generateData  ...");
-		// generateData(sc);
+//		logger.info("create");
+//		createSimpleExample(sc);
+		 logger.info("generateData  ...");
+		 generateData(sc);
 		// logger.info("compute ... ");
 		// compute(sc);
 		// logger.info("showResult ...");
