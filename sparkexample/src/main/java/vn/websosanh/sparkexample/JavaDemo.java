@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -27,6 +28,7 @@ import scala.Tuple2;
 
 import com.datastax.driver.core.Session;
 import com.datastax.spark.connector.cql.CassandraConnector;
+import com.datastax.spark.connector.japi.CassandraRow;
 import com.datastax.spark.connector.japi.RDDAndDStreamCommonJavaFunctions.WriterBuilder;
 import com.google.common.base.Optional;
 
@@ -47,14 +49,33 @@ public class JavaDemo implements Serializable {
 				"/home/hdspark/spark/lib/spark-cassandra-connector-java_2.10-1.2.0-SNAPSHOT.jar",
 				"/home/hdspark/spark/lib/spark-cassandra-connector_2.10-1.2.0-SNAPSHOT.jar" });
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		logger.info("generateData  ...");
-		generateData(sc);
-		logger.info("compute ... ");
-		compute(sc);
-		logger.info("showResult ...");
-		showResults(sc);
-		logger.info("Stopping ..");
+		logger.info("create");
+		createSimpleExample(sc);
+//		logger.info("generateData  ...");
+//		generateData(sc);
+//		logger.info("compute ... ");
+//		compute(sc);
+//		logger.info("showResult ...");
+//		showResults(sc);
+//		logger.info("Stopping ..");
 		sc.stop();
+	}
+	
+	private void createSimpleExample(JavaSparkContext sc){
+		JavaRDD<String> idRdd=javaFunctions(sc).cassandraTable("java_api", "products").map(new Function<CassandraRow, String>() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String call(CassandraRow v1) throws Exception {
+				// TODO Auto-generated method stub
+				return v1.toString();
+			}
+		});
+		System.out.println("Data as CassandraRows: \n" + StringUtils.join(idRdd.toArray(), "\n"));
 	}
 
 	private void generateData(JavaSparkContext sc) {
