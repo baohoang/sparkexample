@@ -13,6 +13,8 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -65,7 +67,10 @@ public class JavaDemo implements Serializable {
 	private void createSimpleExample(JavaSparkContext sc){
 		JavaRDD<Product> idRdd=javaFunctions(sc).cassandraTable("java_api", "products",mapRowTo(Product.class));
 //		System.out.println("Data as CassandraRows: \n" + idRdd.count());
-		idRdd.saveAsTextFile("/spark/sparkexample");
+//		Path out = new Path("/spark/sparkexample");
+//		FileSystem fs = FileSystem.get(conf);
+//		fs.delete(out, true);
+		idRdd.saveAsTextFile("/spark/sparkex");
 	}
 
 	private void generateData(JavaSparkContext sc) {
