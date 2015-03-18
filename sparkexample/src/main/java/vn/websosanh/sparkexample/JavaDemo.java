@@ -53,9 +53,9 @@ public class JavaDemo implements Serializable {
 				"/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar" });
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		logger.info("create");
-//		createSimpleExample(sc);
-		logger.info("generateData  ...");
-		generateData(sc);
+		createSimpleExample(sc);
+//		logger.info("generateData  ...");
+//		generateData(sc);
 //		logger.info("compute ... ");
 //		compute(sc);
 //		logger.info("showResult ...");
@@ -70,7 +70,7 @@ public class JavaDemo implements Serializable {
 //		Path out = new Path("/spark/sparkexample");
 //		FileSystem fs = FileSystem.get(conf);
 //		fs.delete(out, true);
-		idRdd.saveAsTextFile("/spark/sparkex");
+		idRdd.saveAsTextFile("/spark/sparkex1");
 	}
 
 	private void generateData(JavaSparkContext sc) {
