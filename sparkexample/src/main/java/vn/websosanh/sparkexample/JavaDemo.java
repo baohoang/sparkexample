@@ -48,11 +48,11 @@ public class JavaDemo implements Serializable {
 	}
 
 	private void run() {
-//		conf.setJars(new String[] {
-//				"/home/hdspark/spark-cassandra/spark-cassandra-connector_2.10-1.2.0-alpha3.jar",
-//				"/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar",
-//				"/home/hdspark/spark-cassandra/cassandra-driver-core-2.1.4.jar",
-//				"/home/hdspark/sparkexample/sparkexample/sparkexample/target/dependency-jars/*"});
+		// conf.setJars(new String[] {
+		// "/home/hdspark/spark-cassandra/spark-cassandra-connector_2.10-1.2.0-alpha3.jar",
+		// "/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar",
+		// "/home/hdspark/spark-cassandra/cassandra-driver-core-2.1.4.jar",
+		// "/home/hdspark/sparkexample/sparkexample/sparkexample/target/dependency-jars/*"});
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		logger.info("create");
 		createSimpleExample(sc);
@@ -69,11 +69,11 @@ public class JavaDemo implements Serializable {
 	private void createSimpleExample(JavaSparkContext sc) {
 		JavaRDD<Product> idRdd = javaFunctions(sc).cassandraTable("java_api",
 				"products", mapRowTo(Product.class));
-		// System.out.println("Data as CassandraRows: \n" + idRdd.count());
+		logger.info("Data as CassandraRows: \n" + idRdd.count());
 		// Path out = new Path("/spark/sparkexample");
 		// FileSystem fs = FileSystem.get(conf);
 		// fs.delete(out, true);
-		idRdd.saveAsTextFile("/spark/sparkex4");
+		// idRdd.saveAsTextFile("/spark/sparkex4");
 	}
 
 	private void generateData(JavaSparkContext sc) {
