@@ -2,9 +2,13 @@ package vn.websosanh.sparkexample;
 
 import java.text.MessageFormat;
 
-import scala.Serializable;
+import java.io.Serializable;
 
 public class Product implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private String name;
 	private String parents;
