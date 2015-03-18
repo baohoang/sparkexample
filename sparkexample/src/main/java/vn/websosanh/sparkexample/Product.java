@@ -1,7 +1,8 @@
 package vn.websosanh.sparkexample;
 
-import java.io.Serializable;
 import java.text.MessageFormat;
+
+import scala.Serializable;
 
 public class Product implements Serializable {
 	private Integer id;
