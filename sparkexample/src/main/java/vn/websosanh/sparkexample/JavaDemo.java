@@ -48,10 +48,11 @@ public class JavaDemo implements Serializable {
 	}
 
 	private void run() {
-		conf.setJars(new String[] {
-				"/home/hdspark/spark-cassandra/spark-cassandra-connector_2.10-1.2.0-alpha3.jar",
-				"/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar",
-				"/home/hdspark/spark-cassandra/cassandra-driver-core-2.1.4.jar" });
+//		conf.setJars(new String[] {
+//				"/home/hdspark/spark-cassandra/spark-cassandra-connector_2.10-1.2.0-alpha3.jar",
+//				"/home/hdspark/spark-cassandra/spark-cassandra-connector-java_2.10-1.2.0-alpha3.jar",
+//				"/home/hdspark/spark-cassandra/cassandra-driver-core-2.1.4.jar",
+//				"/home/hdspark/sparkexample/sparkexample/sparkexample/target/dependency-jars/*"});
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		logger.info("create");
 		createSimpleExample(sc);
