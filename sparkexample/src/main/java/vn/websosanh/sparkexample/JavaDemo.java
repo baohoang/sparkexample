@@ -82,7 +82,7 @@ public class JavaDemo implements Serializable {
 		WriterBuilder wb=javaFunctions(productsRDD).writerBuilder("java_api", "products",
 				mapToRow(Product.class));
 		logger.info("writerBuild");
-		wb.saveToCassandra();
+		wb.withConnector(connector).saveToCassandra();
 		logger.info("save products complete");
 
 		JavaRDD<Sale> salesRDD = productsRDD.filter(
