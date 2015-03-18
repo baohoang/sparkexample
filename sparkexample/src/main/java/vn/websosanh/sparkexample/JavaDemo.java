@@ -65,7 +65,7 @@ public class JavaDemo implements Serializable {
 	private void createSimpleExample(JavaSparkContext sc){
 		JavaRDD<Product> idRdd=javaFunctions(sc).cassandraTable("java_api", "products",mapRowTo(Product.class));
 //		System.out.println("Data as CassandraRows: \n" + idRdd.count());
-		idRdd.saveAsTextFile("hdfs://spark-slave-2:/example/spark");
+		idRdd.saveAsTextFile("/spark/sparkexample");
 	}
 
 	private void generateData(JavaSparkContext sc) {
