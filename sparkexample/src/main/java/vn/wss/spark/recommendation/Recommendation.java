@@ -51,7 +51,6 @@ public class Recommendation implements Serializable {
 			JavaPairRDD<Tuple2<Long, Long>, Long> c, JavaPairRDD<Long, Long> a) {
 		JavaPairRDD<Long, Tuple2<Long, Long>> x = c
 				.mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long, Tuple2<Long, Long>>() {
-
 					@Override
 					public Tuple2<Long, Tuple2<Long, Long>> call(
 							Tuple2<Tuple2<Long, Long>, Long> t)
@@ -72,7 +71,6 @@ public class Recommendation implements Serializable {
 							throws Exception {
 						// TODO Auto-generated method stub
 						Tuple2<Long, Long> t1 = t._1();
-
 						return new Tuple2(t1._2(), new Tuple2<Long, Long>(t1
 								._1(), t._2()));
 					}
@@ -123,7 +121,7 @@ public class Recommendation implements Serializable {
 					public Tuple2<Long, Long> call(Tuple2<Long, Long> t)
 							throws Exception {
 						// TODO Auto-generated method stub
-						return new Tuple2<Long, Long>(t._1(), t._2());
+						return new Tuple2<Long, Long>(t._2(), t._1());
 					}
 				});
 		JavaPairRDD<Long, Iterable<Long>> userListForItem = userList
@@ -153,6 +151,7 @@ public class Recommendation implements Serializable {
 						return v1 + v2;
 					}
 				});
+		logger.info("read count data completed: "+countReducer.count());
 		return countReducer;
 	}
 
@@ -200,6 +199,7 @@ public class Recommendation implements Serializable {
 						return v1 + v2;
 					}
 				});
+		logger.info("read similar data completed: "+similarReducer.count());
 		return similarReducer;
 	}
 	public static void main(String[] args){
@@ -230,6 +230,5 @@ public class Recommendation implements Serializable {
 				});
 		logger.info("read raw data completed: "+rawData.count());
 		return rawData;
-
 	}
 }
