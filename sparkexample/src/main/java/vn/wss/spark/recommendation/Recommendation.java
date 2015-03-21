@@ -21,8 +21,8 @@ public class Recommendation implements Serializable {
 	/**
 	 * 
 	 */
-	private static final String filePath = "";
-	private static final String rawDataFile = filePath + "";
+	private static final String filePath = "/spark";
+	private static final String rawDataFile = filePath + "/log.txt";
 	private static final long serialVersionUID = 1L;
 	private transient SparkConf conf;
 	private static final Logger logger = LogManager.getLogger(Recommendation.class);
