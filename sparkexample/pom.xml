@@ -109,7 +109,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>vn.websosanh.spark.recommendation.Recommendation</mainClass>
+							<mainClass>vn.wss.spark.recommendation.Recommendation</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
