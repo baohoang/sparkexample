@@ -14,10 +14,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
-
 import scala.Tuple2;
 import scala.Tuple3;
-import vn.websosanh.sparkexample.JavaDemo;
 
 public class Recommendation implements Serializable {
 	/**
@@ -220,7 +218,7 @@ public class Recommendation implements Serializable {
 					@Override
 					public Tuple2<Long, Long> call(String t) throws Exception {
 						// TODO Auto-generated method stub
-						String[] res = t.split(", ");
+						String[] res = t.split(",");
 						if (res.length != 2) {
 							return null;
 						}
@@ -230,6 +228,7 @@ public class Recommendation implements Serializable {
 						return tp;
 					}
 				});
+		logger.info("read raw data completed: "+rawData.count());
 		return rawData;
 
 	}
