@@ -4,6 +4,7 @@ import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
 import static com.datastax.spark.connector.japi.CassandraJavaUtil.mapRowTo;
 import static com.datastax.spark.connector.japi.CassandraJavaUtil.mapToRow;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.logging.log4j.LogManager;
@@ -61,13 +63,13 @@ public class JavaDemo implements Serializable {
 		sc.stop();
 	}
 
-	private void createSimpleExample(JavaSparkContext sc) {
+	private void createSimpleExample(JavaSparkContext sc) throws IOException {
 		CassandraJavaRDD idRdd = javaFunctions(sc).cassandraTable("java_api",
 				"products");
 		logger.info("Data as CassandraRows: \n" + idRdd.first().toString());
-		// Path out = new Path("/spark/sparkexample");
-		// FileSystem fs = FileSystem.get(conf);
-		// fs.delete(out, true);
+		 Path out = new Path("/spark/sparkexample");
+		 FileSystem fs = FileSystem.get(new Configuration());
+		 fs.delete(out, true);
 		// idRdd.saveAsTextFile("/spark/sparkex4");
 	}
 
