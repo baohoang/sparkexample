@@ -14,8 +14,10 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
+
 import scala.Tuple2;
 import scala.Tuple3;
+import vn.websosanh.sparkexample.JavaDemo;
 
 public class Recommendation implements Serializable {
 	/**
@@ -201,6 +203,13 @@ public class Recommendation implements Serializable {
 					}
 				});
 		return similarReducer;
+	}
+	public static void main(String[] args){
+		SparkConf conf = new SparkConf();
+		conf.setAppName("Recommendation Trailer");
+		// conf.setMaster(args[0]);
+		Recommendation recommendation=new Recommendation(conf);
+		recommendation.run();
 	}
 
 	public JavaPairRDD<Long, Long> getData(JavaSparkContext sc) {
