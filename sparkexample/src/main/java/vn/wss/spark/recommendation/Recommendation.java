@@ -6,6 +6,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.join.TupleWritable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -16,15 +21,20 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
+
 import scala.Tuple2;
 import vn.wss.spark.model.RModel;
+import vn.wss.spark.model.RatingWritable;
 
 public class Recommendation implements Serializable {
 	/**
 	 * 
 	 */
-	private static final String filePath = "/spark";
-	private static final String rawDataFile = filePath + "/log.txt";
+	private static final String FILE_PATH = "/spark";
+	private static final String RAW_DATA_FILE = FILE_PATH + "/log.txt";
+	private static final String RESULT_PATH = FILE_PATH + "/result";
+	private static final String ITEM_USER = FILE_PATH + "/item4user";
+	private static final String USER_ITEM = FILE_PATH + "/user4item";
 	private static final long serialVersionUID = 1L;
 	private transient SparkConf conf;
 	private static final Logger logger = LogManager
@@ -43,11 +53,25 @@ public class Recommendation implements Serializable {
 		JavaPairRDD<Long, Long> a = calculate(rawData);
 		JavaPairRDD<Tuple2<Long, Long>, Long> c = calculateSimilar(rawData);
 		JavaPairRDD<Long, Tuple2<Long, Double>> res = fusion(c, a);
-		List<Tuple2<Long, Tuple2<Long, Double>>> list = res.collect();
-		for (int i = 0; i < list.size(); i++) {
-			logger.info(list.get(i)._1() + " " + list.get(i)._2()._1() + " "
-					+ list.get(i)._2()._2());
-		}
+		res.mapToPair(
+				new PairFunction<Tuple2<Long, Tuple2<Long, Double>>, LongWritable, RatingWritable>() {
+
+					@Override
+					public Tuple2<LongWritable, RatingWritable> call(
+							Tuple2<Long, Tuple2<Long, Double>> t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						LongWritable key = new LongWritable(t._1());
+						RatingWritable value = new RatingWritable(
+								new LongWritable(t._2()._1()),
+								new DoubleWritable(t._2()._2()));
+						return new Tuple2<LongWritable, RatingWritable>(key,
+								value);
+					}
+				}).saveAsHadoopFile(RESULT_PATH, LongWritable.class,
+				RatingWritable.class, SequenceFileOutputFormat.class);
+		logger.info("save file result");
+//		res.saveAsTextFile(RESULT_PATH);
 		sc.stop();
 	}
 
@@ -110,8 +134,8 @@ public class Recommendation implements Serializable {
 						long a = t.getA();
 						long b = t.getB();
 						long c = t.getC();
-						logger.info(key + " " + key2 + " " + a + " " + b + " "
-								+ c);
+//						logger.info(key + " " + key2 + " " + a + " " + b + " "
+//								+ c);
 						double rating = c / (a + b - c);
 						return new Tuple2<Long, Tuple2<Long, Double>>(key,
 								new Tuple2<Long, Double>(key2, rating));
@@ -149,6 +173,30 @@ public class Recommendation implements Serializable {
 				});
 		JavaPairRDD<Long, Iterable<Long>> userListForItem = userList
 				.groupByKey();
+		// save SequenceFIle Hadoop
+		userListForItem
+				.mapToPair(
+						new PairFunction<Tuple2<Long, Iterable<Long>>, LongWritable, TupleWritable>() {
+
+							@Override
+							public Tuple2<LongWritable, TupleWritable> call(
+									Tuple2<Long, Iterable<Long>> t)
+									throws Exception {
+								// TODO Auto-generated method stub
+								Iterator<Long> t2 = t._2().iterator();
+								List<LongWritable> list = new ArrayList<LongWritable>();
+								while (t2.hasNext()) {
+									list.add(new LongWritable(t2.next()));
+								}
+								TupleWritable value = new TupleWritable(list
+										.toArray(new LongWritable[list.size()]));
+								LongWritable key = new LongWritable(t._1());
+								return new Tuple2<LongWritable, TupleWritable>(
+										key, value);
+							}
+						}).saveAsHadoopFile(USER_ITEM, LongWritable.class,
+						TupleWritable.class, SequenceFileOutputFormat.class);
+		logger.info("save file user4item");
 		JavaPairRDD<Long, Long> countMapper = userListForItem
 				.mapToPair(new PairFunction<Tuple2<Long, Iterable<Long>>, Long, Long>() {
 
@@ -180,6 +228,30 @@ public class Recommendation implements Serializable {
 			JavaPairRDD<Long, Long> rawData) {
 		JavaPairRDD<Long, Iterable<Long>> itemListForUser = rawData
 				.groupByKey();
+		// save SequenceFIle Hadoop
+		itemListForUser
+				.mapToPair(
+						new PairFunction<Tuple2<Long, Iterable<Long>>, LongWritable, TupleWritable>() {
+
+							@Override
+							public Tuple2<LongWritable, TupleWritable> call(
+									Tuple2<Long, Iterable<Long>> t)
+									throws Exception {
+								// TODO Auto-generated method stub
+								Iterator<Long> t2 = t._2().iterator();
+								List<LongWritable> list = new ArrayList<LongWritable>();
+								while (t2.hasNext()) {
+									list.add(new LongWritable(t2.next()));
+								}
+								TupleWritable value = new TupleWritable(list
+										.toArray(new LongWritable[list.size()]));
+								LongWritable key = new LongWritable(t._1());
+								return new Tuple2<LongWritable, TupleWritable>(
+										key, value);
+							}
+						}).saveAsHadoopFile(ITEM_USER, LongWritable.class,
+						TupleWritable.class, SequenceFileOutputFormat.class);
+		logger.info("save file item4user");
 		JavaPairRDD<Long, Long> similarList = itemListForUser
 				.flatMapToPair(new PairFlatMapFunction<Tuple2<Long, Iterable<Long>>, Long, Long>() {
 
@@ -242,7 +314,7 @@ public class Recommendation implements Serializable {
 	}
 
 	public JavaPairRDD<Long, Long> getData(JavaSparkContext sc) {
-		JavaRDD<String> lines = sc.textFile(rawDataFile, 1);
+		JavaRDD<String> lines = sc.textFile(RAW_DATA_FILE, 1);
 		JavaPairRDD<Long, Long> rawData = lines
 				.mapToPair(new PairFunction<String, Long, Long>() {
 
