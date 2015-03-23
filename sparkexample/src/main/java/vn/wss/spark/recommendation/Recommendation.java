@@ -1,12 +1,17 @@
 package vn.wss.spark.recommendation;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
@@ -32,9 +37,9 @@ public class Recommendation implements Serializable {
 	 */
 	private static final String FILE_PATH = "/spark";
 	private static final String RAW_DATA_FILE = FILE_PATH + "/log.txt";
-	private static final String RESULT_PATH = FILE_PATH + "/result/result.seq";
-	private static final String ITEM_USER = FILE_PATH + "/item4user/result.seq";
-	private static final String USER_ITEM = FILE_PATH + "/user4item/result.seq";
+	private static final String RESULT_PATH = FILE_PATH + "/result";
+	private static final String ITEM_USER = FILE_PATH + "/item4user";
+	private static final String USER_ITEM = FILE_PATH + "/user4item";
 	private static final long serialVersionUID = 1L;
 	private transient SparkConf conf;
 	private static final Logger logger = LogManager
@@ -44,11 +49,19 @@ public class Recommendation implements Serializable {
 		this.conf = conf;
 	}
 
-	public void run() {
+	public void run() throws IOException {
+		Configuration configuration = new Configuration();
+		configuration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+		configuration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+		FileSystem hdfs = FileSystem.get(URI.create("hdfs://spark-slave-2:9000"), configuration);
+		hdfs.delete(new Path(RESULT_PATH), true);
+		hdfs.delete(new Path(ITEM_USER), true);
+		hdfs.delete(new Path(USER_ITEM), true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		// insert process
 		// calculate similar C
 		// calculate A,B
+		
 		JavaPairRDD<Long, Long> rawData = getData(sc);
 		JavaPairRDD<Long, Long> a = calculate(rawData);
 		JavaPairRDD<Tuple2<Long, Long>, Long> c = calculateSimilar(rawData);
@@ -305,7 +318,7 @@ public class Recommendation implements Serializable {
 		return similarReducer;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf();
 		conf.setAppName("Recommendation Trailer");
 		// conf.setMaster(args[0]);
