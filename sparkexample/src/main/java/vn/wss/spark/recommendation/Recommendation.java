@@ -32,9 +32,9 @@ public class Recommendation implements Serializable {
 	 */
 	private static final String FILE_PATH = "/spark";
 	private static final String RAW_DATA_FILE = FILE_PATH + "/log.txt";
-	private static final String RESULT_PATH = FILE_PATH + "/result";
-	private static final String ITEM_USER = FILE_PATH + "/item4user";
-	private static final String USER_ITEM = FILE_PATH + "/user4item";
+	private static final String RESULT_PATH = FILE_PATH + "/result/result.seq";
+	private static final String ITEM_USER = FILE_PATH + "/item4user/result.seq";
+	private static final String USER_ITEM = FILE_PATH + "/user4item/result.seq";
 	private static final long serialVersionUID = 1L;
 	private transient SparkConf conf;
 	private static final Logger logger = LogManager
