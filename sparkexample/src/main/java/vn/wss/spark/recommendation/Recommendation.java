@@ -2,8 +2,10 @@ package vn.wss.spark.recommendation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +16,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
+
 import scala.Tuple2;
 import scala.Tuple3;
 
@@ -25,7 +28,8 @@ public class Recommendation implements Serializable {
 	private static final String rawDataFile = filePath + "/log.txt";
 	private static final long serialVersionUID = 1L;
 	private transient SparkConf conf;
-	private static final Logger logger = LogManager.getLogger(Recommendation.class);
+	private static final Logger logger = LogManager
+			.getLogger(Recommendation.class);
 
 	private Recommendation(SparkConf conf) {
 		this.conf = conf;
@@ -39,10 +43,11 @@ public class Recommendation implements Serializable {
 		JavaPairRDD<Long, Long> rawData = getData(sc);
 		JavaPairRDD<Long, Long> a = calculate(rawData);
 		JavaPairRDD<Tuple2<Long, Long>, Long> c = calculateSimilar(rawData);
-		JavaPairRDD<Long, Tuple2<Long,Double>> res=fusion(c, a);
-		List<Tuple2<Long, Tuple2<Long, Double>>> list=res.collect();
-		for(int i=0;i<list.size();i++){
-			logger.info(list.get(i)._1()+" "+list.get(i)._2()._1()+" "+list.get(i)._2()._2());
+		JavaPairRDD<Long, Tuple2<Long, Double>> res = fusion(c, a);
+		List<Tuple2<Long, Tuple2<Long, Double>>> list = res.collect();
+		for (int i = 0; i < list.size(); i++) {
+			logger.info(list.get(i)._1() + " " + list.get(i)._2()._1() + " "
+					+ list.get(i)._2()._2());
 		}
 		sc.stop();
 	}
@@ -75,7 +80,6 @@ public class Recommendation implements Serializable {
 								._1(), t._2()));
 					}
 				});
-		JavaPairRDD<Long, Tuple2<Tuple2<Long, Long>, Long>> f1 = x.join(a);
 		JavaPairRDD<Long, Tuple2<Tuple2<Long, Long>, Long>> f2 = y.join(a);
 		JavaPairRDD<Long, Tuple3<Long, Long, Long>> r1 = f2
 				.mapToPair(new PairFunction<Tuple2<Long, Tuple2<Tuple2<Long, Long>, Long>>, Long, Tuple3<Long, Long, Long>>() {
@@ -133,25 +137,23 @@ public class Recommendation implements Serializable {
 					public Tuple2<Long, Long> call(
 							Tuple2<Long, Iterable<Long>> t) throws Exception {
 						// TODO Auto-generated method stub
-						long count = 0;
 						Iterator<Long> iterator = t._2().iterator();
+						Set<Long> set = new HashSet<Long>();
 						while (iterator.hasNext()) {
-							count++;
-							iterator.next();
+							set.add(iterator.next());
 						}
-						return new Tuple2<Long, Long>(t._1(), count);
+						return new Tuple2<Long, Long>(t._1(), (long) set.size());
 					}
 				});
 		JavaPairRDD<Long, Long> countReducer = countMapper
 				.reduceByKey(new Function2<Long, Long, Long>() {
-
 					@Override
 					public Long call(Long v1, Long v2) throws Exception {
 						// TODO Auto-generated method stub
 						return v1 + v2;
 					}
 				});
-		logger.info("read count data completed: "+countReducer.count());
+		logger.info("read count data completed: " + countReducer.count());
 		return countReducer;
 	}
 
@@ -199,14 +201,15 @@ public class Recommendation implements Serializable {
 						return v1 + v2;
 					}
 				});
-		logger.info("read similar data completed: "+similarReducer.count());
+		logger.info("read similar data completed: " + similarReducer.count());
 		return similarReducer;
 	}
-	public static void main(String[] args){
+
+	public static void main(String[] args) {
 		SparkConf conf = new SparkConf();
 		conf.setAppName("Recommendation Trailer");
 		// conf.setMaster(args[0]);
-		Recommendation recommendation=new Recommendation(conf);
+		Recommendation recommendation = new Recommendation(conf);
 		recommendation.run();
 	}
 
@@ -228,7 +231,7 @@ public class Recommendation implements Serializable {
 						return tp;
 					}
 				});
-		logger.info("read raw data completed: "+rawData.count());
+		logger.info("read raw data completed: " + rawData.count());
 		return rawData;
 	}
 }
