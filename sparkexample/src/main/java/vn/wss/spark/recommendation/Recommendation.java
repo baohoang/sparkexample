@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -17,9 +16,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
-
 import scala.Tuple2;
-import scala.Tuple3;
 import vn.wss.spark.model.RModel;
 
 public class Recommendation implements Serializable {
@@ -58,23 +55,17 @@ public class Recommendation implements Serializable {
 			JavaPairRDD<Tuple2<Long, Long>, Long> c, JavaPairRDD<Long, Long> a) {
 
 		JavaPairRDD<Long, RModel> s1 = c
-				.flatMapToPair(new PairFlatMapFunction<Tuple2<Tuple2<Long, Long>, Long>, Long, RModel>() {
+				.mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long, RModel>() {
 
 					@Override
-					public Iterable<Tuple2<Long, RModel>> call(
+					public Tuple2<Long, RModel> call(
 							Tuple2<Tuple2<Long, Long>, Long> t)
 							throws Exception {
 						// TODO Auto-generated method stub
-						List<Tuple2<Long, RModel>> list = new ArrayList<>();
 						RModel model1 = new RModel(t._1()._1(), t._1()._2(),
 								-1, -1, t._2());
 						long key1 = t._1()._1();
-						RModel model2 = new RModel(t._1()._2(), t._1()._1(),
-								-1, -1, t._2());
-						long key2 = t._1()._2();
-						list.add(new Tuple2<Long, RModel>(key1, model1));
-						list.add(new Tuple2<Long, RModel>(key2, model2));
-						return list;
+						return new Tuple2<Long, RModel>(key1, model1);
 					}
 				});
 		JavaPairRDD<Long, RModel> s2 = s1
@@ -126,77 +117,18 @@ public class Recommendation implements Serializable {
 								new Tuple2<Long, Double>(key2, rating));
 					}
 				});
-		// JavaPairRDD<Tuple2<Long, Long>, Long> similar = c
-		// .flatMapToPair(new PairFlatMapFunction<Tuple2<Tuple2<Long, Long>,
-		// Long>, Tuple2<Long, Long>, Long>() {
-		//
-		// @Override
-		// public Iterable<Tuple2<Tuple2<Long, Long>, Long>> call(
-		// Tuple2<Tuple2<Long, Long>, Long> t)
-		// throws Exception {
-		// // TODO Auto-generated method stub
-		// List<Tuple2<Tuple2<Long, Long>, Long>> list = new
-		// ArrayList<Tuple2<Tuple2<Long, Long>, Long>>();
-		// list.add(new Tuple2<Tuple2<Long, Long>, Long>(
-		// new Tuple2<Long, Long>(t._1()._2(), t._1()._1()),
-		// t._2()));
-		// list.add(t);
-		// return list;
-		// }
-		// });
-		// JavaPairRDD<Long, Tuple2<Long, Long>> y = similar
-		// .mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long,
-		// Tuple2<Long, Long>>() {
-		//
-		// @Override
-		// public Tuple2<Long, Tuple2<Long, Long>> call(
-		// Tuple2<Tuple2<Long, Long>, Long> t)
-		// throws Exception {
-		// // TODO Auto-generated method stub
-		// Tuple2<Long, Long> t1 = t._1();
-		// return new Tuple2<Long, Tuple2<Long, Long>>(t1._2(),
-		// new Tuple2<Long, Long>(t1._1(), t._2()));
-		// }
-		// });
-		// JavaPairRDD<Long, Tuple2<Tuple2<Long, Long>, Long>> f2 = y.join(a);
-		// JavaPairRDD<Long, Tuple3<Long, Long, Long>> r1 = f2
-		// .mapToPair(new PairFunction<Tuple2<Long, Tuple2<Tuple2<Long, Long>,
-		// Long>>, Long, Tuple3<Long, Long, Long>>() {
-		//
-		// @Override
-		// public Tuple2<Long, Tuple3<Long, Long, Long>> call(
-		// Tuple2<Long, Tuple2<Tuple2<Long, Long>, Long>> t)
-		// throws Exception {
-		// // TODO Auto-generated method stub
-		// return new Tuple2<Long, Tuple3<Long, Long, Long>>(t
-		// ._2()._1()._1(), new Tuple3<Long, Long, Long>(t
-		// ._1(), t._2()._1()._2(), t._2()._2()));
-		// }
-		// });
-		// JavaPairRDD<Long, Tuple2<Long, Double>> res = a
-		// .join(r1)
-		// .mapToPair(
-		// new PairFunction<Tuple2<Long, Tuple2<Long, Tuple3<Long, Long,
-		// Long>>>, Long, Tuple2<Long, Double>>() {
-		//
-		// @Override
-		// public Tuple2<Long, Tuple2<Long, Double>> call(
-		// Tuple2<Long, Tuple2<Long, Tuple3<Long, Long, Long>>> t)
-		// throws Exception {
-		// // TODO Auto-generated method stub
-		// Long key1 = t._1();
-		// Long key2 = t._2()._2()._1();
-		// long c = t._2()._2()._2();
-		// long a = t._2()._1();
-		// long b = t._2()._2()._3();
-		// logger.info(key1 + " " + key2 + " " + a + " "
-		// + b + " " + c);
-		// double rating = c / (a + b - c);
-		// return new Tuple2<Long, Tuple2<Long, Double>>(
-		// key1, new Tuple2<Long, Double>(key2,
-		// rating));
-		// }
-		// });
+		res=res.flatMapToPair(new PairFlatMapFunction<Tuple2<Long,Tuple2<Long,Double>>, Long, Tuple2<Long, Double>>() {
+
+			@Override
+			public Iterable<Tuple2<Long, Tuple2<Long, Double>>> call(
+					Tuple2<Long, Tuple2<Long, Double>> t) throws Exception {
+				// TODO Auto-generated method stub
+				List<Tuple2<Long, Tuple2<Long, Double>>> list=new ArrayList<Tuple2<Long,Tuple2<Long,Double>>>();
+				list.add(t);
+				list.add(new Tuple2<Long, Tuple2<Long,Double>>(t._2()._1(), new Tuple2<Long, Double>(t._1(), t._2()._2())));
+				return list;
+			}
+		});
 		return res;
 	}
 
@@ -252,10 +184,13 @@ public class Recommendation implements Serializable {
 							Tuple2<Long, Iterable<Long>> t) throws Exception {
 						// TODO Auto-generated method stub
 						List<Tuple2<Long, Long>> list = new ArrayList<Tuple2<Long, Long>>();
-						Iterable<Long> res = t._2();
-						res.iterator().hasNext();
-						for (Long i : res) {
-							for (Long j : res) {
+						Iterator<Long> iterator = t._2().iterator();
+						Set<Long> set = new HashSet<Long>();
+						while (iterator.hasNext()) {
+							set.add(iterator.next());
+						}
+						for (Long i : set) {
+							for (Long j : set) {
 								if (i != j) {
 									if (i < j) {
 										list.add(new Tuple2<Long, Long>(i, j));
