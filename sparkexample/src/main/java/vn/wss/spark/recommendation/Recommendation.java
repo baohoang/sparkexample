@@ -6,18 +6,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 import scala.Tuple3;
+import vn.wss.spark.model.RModel;
 
 public class Recommendation implements Serializable {
 	/**
@@ -54,86 +57,144 @@ public class Recommendation implements Serializable {
 	public JavaPairRDD<Long, Tuple2<Long, Double>> fusion(
 			JavaPairRDD<Tuple2<Long, Long>, Long> c, JavaPairRDD<Long, Long> a) {
 
-		JavaPairRDD<Tuple2<Long, Long>, Long> similar = c
-				.flatMapToPair(new PairFlatMapFunction<Tuple2<Tuple2<Long, Long>, Long>, Tuple2<Long, Long>, Long>() {
+		JavaPairRDD<Long, RModel> s1 = c
+				.flatMapToPair(new PairFlatMapFunction<Tuple2<Tuple2<Long, Long>, Long>, Long, RModel>() {
 
 					@Override
-					public Iterable<Tuple2<Tuple2<Long, Long>, Long>> call(
+					public Iterable<Tuple2<Long, RModel>> call(
 							Tuple2<Tuple2<Long, Long>, Long> t)
 							throws Exception {
 						// TODO Auto-generated method stub
-						List<Tuple2<Tuple2<Long, Long>, Long>> list = new ArrayList<Tuple2<Tuple2<Long, Long>, Long>>();
-						list.add(new Tuple2<Tuple2<Long, Long>, Long>(
-								new Tuple2<Long, Long>(t._1()._2(), t._1()._1()),
-								t._2()));
-						list.add(t);
+						List<Tuple2<Long, RModel>> list = new ArrayList<>();
+						RModel model1 = new RModel(t._1()._1(), t._1()._2(),
+								-1, -1, t._2());
+						long key1 = t._1()._1();
+						RModel model2 = new RModel(t._1()._2(), t._1()._1(),
+								-1, -1, t._2());
+						long key2 = t._1()._2();
+						list.add(new Tuple2<Long, RModel>(key1, model1));
+						list.add(new Tuple2<Long, RModel>(key2, model2));
 						return list;
 					}
 				});
-		JavaPairRDD<Long, Tuple2<Long, Long>> y = similar
-				.mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long, Tuple2<Long, Long>>() {
+		JavaPairRDD<Long, RModel> s2 = s1
+				.join(a)
+				.mapToPair(
+						new PairFunction<Tuple2<Long, Tuple2<RModel, Long>>, Long, RModel>() {
+
+							@Override
+							public Tuple2<Long, RModel> call(
+									Tuple2<Long, Tuple2<RModel, Long>> t)
+									throws Exception {
+								// TODO Auto-generated method stub
+								RModel m = t._2()._1();
+								long key = m.getSimilarId();
+								long a = t._2()._2();
+								m.setA(a);
+								return new Tuple2<Long, RModel>(key, m);
+							}
+						});
+		JavaRDD<RModel> s3 = s2.join(a).map(
+				new Function<Tuple2<Long, Tuple2<RModel, Long>>, RModel>() {
 
 					@Override
-					public Tuple2<Long, Tuple2<Long, Long>> call(
-							Tuple2<Tuple2<Long, Long>, Long> t)
+					public RModel call(Tuple2<Long, Tuple2<RModel, Long>> v1)
 							throws Exception {
 						// TODO Auto-generated method stub
-						Tuple2<Long, Long> t1 = t._1();
-						return new Tuple2<Long, Tuple2<Long, Long>>(t1._2(),
-								new Tuple2<Long, Long>(t1._1(), t._2()));
+						RModel model = v1._2()._1();
+						long b = v1._2()._2();
+						model.setB(b);
+						return model;
 					}
 				});
-		// JavaPairRDD<Long, Tuple2<Long, Long>> x = similar
+		JavaPairRDD<Long, Tuple2<Long, Double>> res = s3
+				.mapToPair(new PairFunction<RModel, Long, Tuple2<Long, Double>>() {
+
+					@Override
+					public Tuple2<Long, Tuple2<Long, Double>> call(RModel t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						long key = t.getItemId();
+						long key2 = t.getSimilarId();
+						long a = t.getA();
+						long b = t.getB();
+						long c = t.getC();
+						double rating = c / (a + b - c);
+						return new Tuple2<Long, Tuple2<Long, Double>>(key,
+								new Tuple2<Long, Double>(key2, rating));
+					}
+				});
+		// JavaPairRDD<Tuple2<Long, Long>, Long> similar = c
+		// .flatMapToPair(new PairFlatMapFunction<Tuple2<Tuple2<Long, Long>,
+		// Long>, Tuple2<Long, Long>, Long>() {
+		//
+		// @Override
+		// public Iterable<Tuple2<Tuple2<Long, Long>, Long>> call(
+		// Tuple2<Tuple2<Long, Long>, Long> t)
+		// throws Exception {
+		// // TODO Auto-generated method stub
+		// List<Tuple2<Tuple2<Long, Long>, Long>> list = new
+		// ArrayList<Tuple2<Tuple2<Long, Long>, Long>>();
+		// list.add(new Tuple2<Tuple2<Long, Long>, Long>(
+		// new Tuple2<Long, Long>(t._1()._2(), t._1()._1()),
+		// t._2()));
+		// list.add(t);
+		// return list;
+		// }
+		// });
+		// JavaPairRDD<Long, Tuple2<Long, Long>> y = similar
 		// .mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long,
 		// Tuple2<Long, Long>>() {
+		//
 		// @Override
 		// public Tuple2<Long, Tuple2<Long, Long>> call(
 		// Tuple2<Tuple2<Long, Long>, Long> t)
 		// throws Exception {
 		// // TODO Auto-generated method stub
 		// Tuple2<Long, Long> t1 = t._1();
-		//
-		// return new Tuple2<Long, Tuple2<Long, Long>>(t1._1(), new Tuple2<Long,
-		// Long>(t1
-		// ._2(), t._2()));
+		// return new Tuple2<Long, Tuple2<Long, Long>>(t1._2(),
+		// new Tuple2<Long, Long>(t1._1(), t._2()));
 		// }
 		// });
-		JavaPairRDD<Long, Tuple2<Tuple2<Long, Long>, Long>> f2 = y.join(a);
-		JavaPairRDD<Long, Tuple3<Long, Long, Long>> r1 = f2
-				.mapToPair(new PairFunction<Tuple2<Long, Tuple2<Tuple2<Long, Long>, Long>>, Long, Tuple3<Long, Long, Long>>() {
-
-					@Override
-					public Tuple2<Long, Tuple3<Long, Long, Long>> call(
-							Tuple2<Long, Tuple2<Tuple2<Long, Long>, Long>> t)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return new Tuple2<Long, Tuple3<Long, Long, Long>>(t
-								._2()._1()._1(), new Tuple3<Long, Long, Long>(t
-								._1(), t._2()._1()._2(), t._2()._2()));
-					}
-				});
-		JavaPairRDD<Long, Tuple2<Long, Double>> res = a
-				.join(r1)
-				.mapToPair(
-						new PairFunction<Tuple2<Long, Tuple2<Long, Tuple3<Long, Long, Long>>>, Long, Tuple2<Long, Double>>() {
-
-							@Override
-							public Tuple2<Long, Tuple2<Long, Double>> call(
-									Tuple2<Long, Tuple2<Long, Tuple3<Long, Long, Long>>> t)
-									throws Exception {
-								// TODO Auto-generated method stub
-								Long key1 = t._1();
-								Long key2 = t._2()._2()._1();
-								long c = t._2()._2()._2();
-								long a = t._2()._1();
-								long b = t._2()._2()._3();
-								logger.info(key1+" "+key2+" "+a+" "+b+" "+c);
-								double rating = c / (a + b - c);
-								return new Tuple2<Long, Tuple2<Long, Double>>(
-										key1, new Tuple2<Long, Double>(key2,
-												rating));
-							}
-						});
+		// JavaPairRDD<Long, Tuple2<Tuple2<Long, Long>, Long>> f2 = y.join(a);
+		// JavaPairRDD<Long, Tuple3<Long, Long, Long>> r1 = f2
+		// .mapToPair(new PairFunction<Tuple2<Long, Tuple2<Tuple2<Long, Long>,
+		// Long>>, Long, Tuple3<Long, Long, Long>>() {
+		//
+		// @Override
+		// public Tuple2<Long, Tuple3<Long, Long, Long>> call(
+		// Tuple2<Long, Tuple2<Tuple2<Long, Long>, Long>> t)
+		// throws Exception {
+		// // TODO Auto-generated method stub
+		// return new Tuple2<Long, Tuple3<Long, Long, Long>>(t
+		// ._2()._1()._1(), new Tuple3<Long, Long, Long>(t
+		// ._1(), t._2()._1()._2(), t._2()._2()));
+		// }
+		// });
+		// JavaPairRDD<Long, Tuple2<Long, Double>> res = a
+		// .join(r1)
+		// .mapToPair(
+		// new PairFunction<Tuple2<Long, Tuple2<Long, Tuple3<Long, Long,
+		// Long>>>, Long, Tuple2<Long, Double>>() {
+		//
+		// @Override
+		// public Tuple2<Long, Tuple2<Long, Double>> call(
+		// Tuple2<Long, Tuple2<Long, Tuple3<Long, Long, Long>>> t)
+		// throws Exception {
+		// // TODO Auto-generated method stub
+		// Long key1 = t._1();
+		// Long key2 = t._2()._2()._1();
+		// long c = t._2()._2()._2();
+		// long a = t._2()._1();
+		// long b = t._2()._2()._3();
+		// logger.info(key1 + " " + key2 + " " + a + " "
+		// + b + " " + c);
+		// double rating = c / (a + b - c);
+		// return new Tuple2<Long, Tuple2<Long, Double>>(
+		// key1, new Tuple2<Long, Double>(key2,
+		// rating));
+		// }
+		// });
 		return res;
 	}
 
