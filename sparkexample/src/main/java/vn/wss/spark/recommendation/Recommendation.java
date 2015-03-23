@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -54,32 +53,51 @@ public class Recommendation implements Serializable {
 
 	public JavaPairRDD<Long, Tuple2<Long, Double>> fusion(
 			JavaPairRDD<Tuple2<Long, Long>, Long> c, JavaPairRDD<Long, Long> a) {
-		JavaPairRDD<Long, Tuple2<Long, Long>> x = c
+
+		JavaPairRDD<Tuple2<Long, Long>, Long> similar = c
+				.flatMapToPair(new PairFlatMapFunction<Tuple2<Tuple2<Long, Long>, Long>, Tuple2<Long, Long>, Long>() {
+
+					@Override
+					public Iterable<Tuple2<Tuple2<Long, Long>, Long>> call(
+							Tuple2<Tuple2<Long, Long>, Long> t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						List<Tuple2<Tuple2<Long, Long>, Long>> list = new ArrayList<Tuple2<Tuple2<Long, Long>, Long>>();
+						list.add(new Tuple2<Tuple2<Long, Long>, Long>(
+								new Tuple2<Long, Long>(t._1()._2(), t._1()._1()),
+								t._2()));
+						list.add(t);
+						return list;
+					}
+				});
+		JavaPairRDD<Long, Tuple2<Long, Long>> y = similar
 				.mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long, Tuple2<Long, Long>>() {
+
 					@Override
 					public Tuple2<Long, Tuple2<Long, Long>> call(
 							Tuple2<Tuple2<Long, Long>, Long> t)
 							throws Exception {
 						// TODO Auto-generated method stub
 						Tuple2<Long, Long> t1 = t._1();
-
-						return new Tuple2(t1._1(), new Tuple2<Long, Long>(t1
-								._2(), t._2()));
+						return new Tuple2<Long, Tuple2<Long, Long>>(t1._2(),
+								new Tuple2<Long, Long>(t1._1(), t._2()));
 					}
 				});
-		JavaPairRDD<Long, Tuple2<Long, Long>> y = c
-				.mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long, Tuple2<Long, Long>>() {
-
-					@Override
-					public Tuple2<Long, Tuple2<Long, Long>> call(
-							Tuple2<Tuple2<Long, Long>, Long> t)
-							throws Exception {
-						// TODO Auto-generated method stub
-						Tuple2<Long, Long> t1 = t._1();
-						return new Tuple2(t1._2(), new Tuple2<Long, Long>(t1
-								._1(), t._2()));
-					}
-				});
+		// JavaPairRDD<Long, Tuple2<Long, Long>> x = similar
+		// .mapToPair(new PairFunction<Tuple2<Tuple2<Long, Long>, Long>, Long,
+		// Tuple2<Long, Long>>() {
+		// @Override
+		// public Tuple2<Long, Tuple2<Long, Long>> call(
+		// Tuple2<Tuple2<Long, Long>, Long> t)
+		// throws Exception {
+		// // TODO Auto-generated method stub
+		// Tuple2<Long, Long> t1 = t._1();
+		//
+		// return new Tuple2<Long, Tuple2<Long, Long>>(t1._1(), new Tuple2<Long,
+		// Long>(t1
+		// ._2(), t._2()));
+		// }
+		// });
 		JavaPairRDD<Long, Tuple2<Tuple2<Long, Long>, Long>> f2 = y.join(a);
 		JavaPairRDD<Long, Tuple3<Long, Long, Long>> r1 = f2
 				.mapToPair(new PairFunction<Tuple2<Long, Tuple2<Tuple2<Long, Long>, Long>>, Long, Tuple3<Long, Long, Long>>() {
@@ -104,14 +122,16 @@ public class Recommendation implements Serializable {
 									Tuple2<Long, Tuple2<Long, Tuple3<Long, Long, Long>>> t)
 									throws Exception {
 								// TODO Auto-generated method stub
-								Long key = t._1();
+								Long key1 = t._1();
+								Long key2 = t._2()._2()._1();
 								long c = t._2()._2()._2();
 								long a = t._2()._1();
 								long b = t._2()._2()._3();
+								logger.info(key1+" "+key2+" "+a+" "+b+" "+c);
 								double rating = c / (a + b - c);
 								return new Tuple2<Long, Tuple2<Long, Double>>(
-										key, new Tuple2<Long, Double>(t._2()
-												._2()._1(), rating));
+										key1, new Tuple2<Long, Double>(key2,
+												rating));
 							}
 						});
 		return res;
@@ -174,8 +194,11 @@ public class Recommendation implements Serializable {
 						for (Long i : res) {
 							for (Long j : res) {
 								if (i != j) {
-									list.add(new Tuple2<Long, Long>(i, j));
-									list.add(new Tuple2<Long, Long>(j, i));
+									if (i < j) {
+										list.add(new Tuple2<Long, Long>(i, j));
+									} else {
+										list.add(new Tuple2<Long, Long>(j, i));
+									}
 								}
 							}
 						}
