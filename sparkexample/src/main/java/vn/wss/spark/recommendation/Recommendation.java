@@ -51,17 +51,26 @@ public class Recommendation implements Serializable {
 
 	public void run() throws IOException {
 		Configuration configuration = new Configuration();
-		configuration.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-		configuration.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-		FileSystem hdfs = FileSystem.get(URI.create("hdfs://spark-slave-2:9000"), configuration);
-		hdfs.delete(new Path(RESULT_PATH), true);
-		hdfs.delete(new Path(ITEM_USER), true);
-		hdfs.delete(new Path(USER_ITEM), true);
+		configuration.set("fs.hdfs.impl",
+				org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+		configuration.set("fs.file.impl",
+				org.apache.hadoop.fs.LocalFileSystem.class.getName());
+		FileSystem hdfs = FileSystem.get(
+				URI.create("hdfs://spark-slave-2:9000"), configuration);
+		if (hdfs.exists(new Path(RESULT_PATH))) {
+			hdfs.delete(new Path(RESULT_PATH), true);
+		}
+		if (hdfs.exists(new Path(ITEM_USER))) {
+			hdfs.delete(new Path(ITEM_USER), true);
+		}
+		if (hdfs.exists(new Path(USER_ITEM))) {
+			hdfs.delete(new Path(USER_ITEM), true);
+		}
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		// insert process
 		// calculate similar C
 		// calculate A,B
-		
+
 		JavaPairRDD<Long, Long> rawData = getData(sc);
 		JavaPairRDD<Long, Long> a = calculate(rawData);
 		JavaPairRDD<Tuple2<Long, Long>, Long> c = calculateSimilar(rawData);
@@ -84,7 +93,7 @@ public class Recommendation implements Serializable {
 				}).saveAsHadoopFile(RESULT_PATH, LongWritable.class,
 				RatingWritable.class, SequenceFileOutputFormat.class);
 		logger.info("save file result");
-//		res.saveAsTextFile(RESULT_PATH);
+		// res.saveAsTextFile(RESULT_PATH);
 		sc.stop();
 	}
 
@@ -147,8 +156,9 @@ public class Recommendation implements Serializable {
 						long a = t.getA();
 						long b = t.getB();
 						long c = t.getC();
-//						logger.info(key + " " + key2 + " " + a + " " + b + " "
-//								+ c);
+						// logger.info(key + " " + key2 + " " + a + " " + b +
+						// " "
+						// + c);
 						double rating = c / (a + b - c);
 						return new Tuple2<Long, Tuple2<Long, Double>>(key,
 								new Tuple2<Long, Double>(key2, rating));
