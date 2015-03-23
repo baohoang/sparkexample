@@ -119,6 +119,8 @@ public class Recommendation implements Serializable {
 						long a = t.getA();
 						long b = t.getB();
 						long c = t.getC();
+						logger.info(key + " " + key2 + " " + a + " " + b + " "
+								+ c);
 						double rating = c / (a + b - c);
 						return new Tuple2<Long, Tuple2<Long, Double>>(key,
 								new Tuple2<Long, Double>(key2, rating));
