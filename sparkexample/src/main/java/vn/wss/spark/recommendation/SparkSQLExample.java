@@ -50,7 +50,7 @@ public class SparkSQLExample {
 						ArrayLongList t2 = t._2();
 						LongWritable[] it = t2.getArr();
 						int size = t2.getSize().get();
-						ArrayList<Long> list = new ArrayList<Long>();
+						List<Long> list = new ArrayList<Long>();
 						for (int i = 0; i < size; i++) {
 							list.add(it[i].get());
 						}
