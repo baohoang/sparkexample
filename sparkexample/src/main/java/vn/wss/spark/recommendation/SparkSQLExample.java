@@ -33,8 +33,10 @@ public class SparkSQLExample {
 		SparkConf conf = new SparkConf();
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
+		logger.info("reading ...");
 		JavaPairRDD<LongWritable, TupleWritable> rawData = sc.sequenceFile(
 				USER_ITEM, LongWritable.class, TupleWritable.class);
+		logger.info("read item"+rawData.count());
 		JavaRDD<UserForItem> user4item = rawData
 				.map(new Function<Tuple2<LongWritable, TupleWritable>, UserForItem>() {
 
