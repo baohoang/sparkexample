@@ -116,7 +116,7 @@
 					<archive>
 						<manifest>
 							<!-- <mainClass>vn.wss.spark.recommendation.Recommendation</mainClass> -->
-							<mainClass>vn.wss.spark.recommendation.SparkSQLExample</mainClass>
+							<mainClass>vn.wss.spark.recommendation.Recommendation</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
