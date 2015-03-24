@@ -45,7 +45,7 @@ public class SparkSQLExample {
 						// TODO Auto-generated method stub
 						long key = t._1().get();
 						TupleWritable t2 = t._2();
-						List<Long> list = new ArrayList<>();
+						ArrayList<Long> list = new ArrayList<>();
 						Iterator<Writable> it = t2.iterator();
 						while (it.hasNext()) {
 							LongWritable v = (LongWritable) it.next();
