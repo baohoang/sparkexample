@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -31,7 +30,6 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
 import com.datastax.driver.core.Session;
-import com.datastax.spark.connector.japi.CassandraRow;
 import com.datastax.spark.connector.cql.CassandraConnector;
 import com.datastax.spark.connector.japi.RDDAndDStreamCommonJavaFunctions.WriterBuilder;
 import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;

@@ -1,12 +1,9 @@
 package vn.wss.spark.recommendation;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapreduce.lib.join.TupleWritable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -14,7 +11,6 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
@@ -23,7 +19,6 @@ import scala.Tuple2;
 import vn.wss.spark.model.ArrayLongListWritable;
 import vn.wss.spark.model.LongList;
 import vn.wss.spark.model.Rating;
-import vn.wss.spark.model.RatingWritable;
 import vn.wss.spark.model.UserForItem;
 
 public class SparkSQLExample {
@@ -63,13 +58,13 @@ public class SparkSQLExample {
 				});
 		logger.info("size before: " + user4item.count());
 		DataFrame dataFrame = sqlContext.createDataFrame(user4item,
-				Rating.class);
+				UserForItem.class);
 		logger.info("columns name: " + dataFrame.columns()[0] + " "
 				+ dataFrame.columns()[1]);
 		logger.info("creating ...");
 		dataFrame.registerTempTable("user4item");
 		JavaRDD<UserForItem> load = sqlContext
-				.sql("SELECT * FROM rating WHERE id = 204422435").javaRDD()
+				.sql("SELECT * FROM user4item").javaRDD()
 				.map(new Function<Row, UserForItem>() {
 
 					@Override
