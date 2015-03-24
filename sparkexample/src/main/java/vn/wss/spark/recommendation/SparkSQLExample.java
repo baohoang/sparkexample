@@ -21,11 +21,14 @@ import org.apache.spark.sql.SQLContext;
 
 import scala.Tuple2;
 import vn.wss.spark.model.ArrayLongList;
+import vn.wss.spark.model.Rating;
+import vn.wss.spark.model.RatingWritable;
 import vn.wss.spark.model.UserForItem;
 
 public class SparkSQLExample {
 	private static final String FILE_PATH = "/spark";
 	private static final String USER_ITEM = FILE_PATH + "/user4item";
+	private static final String RESULT_PATH = FILE_PATH + "/result";
 
 	private static final Logger logger = LogManager
 			.getLogger(SparkSQLExample.class);
@@ -35,45 +38,39 @@ public class SparkSQLExample {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		logger.info("reading ...");
-		JavaPairRDD<LongWritable, ArrayLongList> rawData = sc.sequenceFile(
-				USER_ITEM, LongWritable.class, ArrayLongList.class);
+		JavaPairRDD<LongWritable, RatingWritable> rawData = sc.sequenceFile(
+				RESULT_PATH, LongWritable.class, RatingWritable.class);
 		logger.info("read item" + rawData.count());
-		JavaRDD<UserForItem> user4item = rawData
-				.map(new Function<Tuple2<LongWritable, ArrayLongList>, UserForItem>() {
+		JavaRDD<Rating> user4item = rawData
+				.map(new Function<Tuple2<LongWritable, RatingWritable>, Rating>() {
 
 					@Override
-					public UserForItem call(
-							Tuple2<LongWritable, ArrayLongList> t)
+					public Rating call(Tuple2<LongWritable, RatingWritable> t)
 							throws Exception {
 						// TODO Auto-generated method stub
 						long key = t._1().get();
-						ArrayLongList t2 = t._2();
-						LongWritable[] it = t2.getArr();
-						int size = t2.getSize().get();
-						List<Long> list = new ArrayList<Long>();
-						for (int i = 0; i < size; i++) {
-							list.add(it[i].get());
-						}
-						return new UserForItem(key, list);
+						RatingWritable t2 = t._2();
+						Rating rating = new Rating(t2.getId().get(), t2
+								.getRate().get());
+						return rating;
 					}
 				});
 		logger.info("size before: " + user4item.count());
 		DataFrame dataFrame = sqlContext.createDataFrame(user4item,
-				UserForItem.class);
-		dataFrame.registerTempTable("user4item");
+				Rating.class);
 		logger.info("columns name: " + dataFrame.columns().toString());
-
-		JavaPairRDD<Long, List<Long>> load = sqlContext
-				.sql("SELECT * FROM user4item").javaRDD()
-				.mapToPair(new PairFunction<Row, Long, List<Long>>() {
+		logger.info("creating ...");
+		dataFrame.registerTempTable("rating");
+		JavaRDD<Rating> load = sqlContext
+				.sql("SELECT * FROM rating WHERE id = 204422435").javaRDD()
+				.map(new Function<Row, Rating>() {
 
 					@Override
-					public Tuple2<Long, List<Long>> call(Row t)
-							throws Exception {
+					public Rating call(Row v1) throws Exception {
 						// TODO Auto-generated method stub
-						long key = t.getLong(0);
-						List<Long> val = t.getList(1);
-						return new Tuple2<Long, List<Long>>(key, val);
+						long id = v1.getLong(0);
+						double r = v1.getDouble(1);
+						return new Rating(id, r);
 					}
 				});
 		logger.info("size after: " + load.count());
