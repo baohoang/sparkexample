@@ -57,21 +57,21 @@ public class SparkSQLExample {
 		DataFrame dataFrame = sqlContext.createDataFrame(user4item,
 				UserForItem.class);
 		dataFrame.registerTempTable("user4item");
-		logger.info("columns name: "+dataFrame.columns().toString());
-		logger.info("size before: "+user4item.count());
-		JavaPairRDD<Long, Iterable<Long>> load=sqlContext.sql("SELECT * FROM user4item")
-				.javaRDD()
-				.mapToPair(new PairFunction<Row, Long, Iterable<Long>>() {
+		logger.info("columns name: " + dataFrame.columns().toString());
+		logger.info("size before: " + user4item.count());
+		JavaPairRDD<Long, List<Long>> load = sqlContext
+				.sql("SELECT * FROM user4item").javaRDD()
+				.mapToPair(new PairFunction<Row, Long, List<Long>>() {
 
 					@Override
-					public Tuple2<Long, Iterable<Long>> call(Row t)
+					public Tuple2<Long, List<Long>> call(Row t)
 							throws Exception {
 						// TODO Auto-generated method stub
 						long key = t.getLong(0);
-						Iterable<Long> val = t.getList(1);
-						return new Tuple2<Long, Iterable<Long>>(key, val);
+						List<Long> val = t.getList(1);
+						return new Tuple2<Long, List<Long>>(key, val);
 					}
 				});
-		logger.info("size after: "+load.count());
+		logger.info("size after: " + load.count());
 	}
 }
