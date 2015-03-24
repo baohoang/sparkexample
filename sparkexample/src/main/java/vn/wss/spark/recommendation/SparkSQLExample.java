@@ -20,7 +20,8 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 
 import scala.Tuple2;
-import vn.wss.spark.model.ArrayLongList;
+import vn.wss.spark.model.ArrayLongListWritable;
+import vn.wss.spark.model.LongList;
 import vn.wss.spark.model.Rating;
 import vn.wss.spark.model.RatingWritable;
 import vn.wss.spark.model.UserForItem;
@@ -38,39 +39,45 @@ public class SparkSQLExample {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		logger.info("reading ...");
-		JavaPairRDD<LongWritable, RatingWritable> rawData = sc.sequenceFile(
-				RESULT_PATH, LongWritable.class, RatingWritable.class);
+		JavaPairRDD<LongWritable, ArrayLongListWritable> rawData = sc
+				.sequenceFile(USER_ITEM, LongWritable.class,
+						ArrayLongListWritable.class);
 		logger.info("read item" + rawData.count());
-		JavaRDD<Rating> user4item = rawData
-				.map(new Function<Tuple2<LongWritable, RatingWritable>, Rating>() {
+		JavaRDD<UserForItem> user4item = rawData
+				.map(new Function<Tuple2<LongWritable, ArrayLongListWritable>, UserForItem>() {
 
 					@Override
-					public Rating call(Tuple2<LongWritable, RatingWritable> t)
+					public UserForItem call(
+							Tuple2<LongWritable, ArrayLongListWritable> t)
 							throws Exception {
 						// TODO Auto-generated method stub
 						long key = t._1().get();
-						RatingWritable t2 = t._2();
-						Rating rating = new Rating(t2.getId().get(), t2
-								.getRate().get());
-						return rating;
+						ArrayLongListWritable t2 = t._2();
+						List<Long> list = new ArrayList<Long>();
+						for (int i = 0; i < t2.getSize().get(); i++) {
+							list.add(t2.getArr()[i].get());
+						}
+						LongList v = new LongList(list);
+						return new UserForItem(key, v);
 					}
 				});
 		logger.info("size before: " + user4item.count());
 		DataFrame dataFrame = sqlContext.createDataFrame(user4item,
 				Rating.class);
-		logger.info("columns name: " + dataFrame.columns().toString());
+		logger.info("columns name: " + dataFrame.columns()[0] + " "
+				+ dataFrame.columns()[1]);
 		logger.info("creating ...");
-		dataFrame.registerTempTable("rating");
-		JavaRDD<Rating> load = sqlContext
+		dataFrame.registerTempTable("user4item");
+		JavaRDD<UserForItem> load = sqlContext
 				.sql("SELECT * FROM rating WHERE id = 204422435").javaRDD()
-				.map(new Function<Row, Rating>() {
+				.map(new Function<Row, UserForItem>() {
 
 					@Override
-					public Rating call(Row v1) throws Exception {
+					public UserForItem call(Row v1) throws Exception {
 						// TODO Auto-generated method stub
 						long id = v1.getLong(0);
-						double r = v1.getDouble(1);
-						return new Rating(id, r);
+						LongList l = new LongList(v1.getList(1));
+						return new UserForItem(id, l);
 					}
 				});
 		logger.info("size after: " + load.count());

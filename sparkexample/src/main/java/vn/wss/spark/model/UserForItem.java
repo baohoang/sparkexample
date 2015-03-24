@@ -1,7 +1,6 @@
 package vn.wss.spark.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class UserForItem implements Serializable {
 	/**
@@ -9,12 +8,12 @@ public class UserForItem implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Long idtem;
-	private List<Long> listuser;
+	private LongList listuser;
 
 	public UserForItem() {
 	}
 
-	public UserForItem(Long idtem, List<Long> listuser) {
+	public UserForItem(Long idtem, LongList listuser) {
 		this.idtem = idtem;
 		this.listuser = listuser;
 	}
@@ -27,11 +26,11 @@ public class UserForItem implements Serializable {
 		this.idtem = idtem;
 	}
 
-	public List<Long> getListuser() {
+	public LongList getListuser() {
 		return listuser;
 	}
 
-	public void setListuser(List<Long> listuser) {
+	public void setListuser(LongList listuser) {
 		this.listuser = listuser;
 	}
 }

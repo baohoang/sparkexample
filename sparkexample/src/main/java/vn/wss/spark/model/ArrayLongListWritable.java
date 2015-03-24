@@ -8,15 +8,15 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Writable;
 
-public class ArrayLongList implements Writable {
+public class ArrayLongListWritable implements Writable {
 
 	private IntWritable size;
 	private LongWritable[] arr;
 
-	public ArrayLongList() {
+	public ArrayLongListWritable() {
 	}
 
-	public ArrayLongList(IntWritable size, LongWritable[] arr) {
+	public ArrayLongListWritable(IntWritable size, LongWritable[] arr) {
 		this.size = size;
 		this.arr = arr;
 	}
