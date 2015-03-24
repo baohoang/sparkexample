@@ -54,11 +54,12 @@ public class SparkSQLExample {
 						return new UserForItem(key, list);
 					}
 				});
+		logger.info("size before: " + user4item.count());
 		DataFrame dataFrame = sqlContext.createDataFrame(user4item,
 				UserForItem.class);
 		dataFrame.registerTempTable("user4item");
 		logger.info("columns name: " + dataFrame.columns().toString());
-		logger.info("size before: " + user4item.count());
+		
 		JavaPairRDD<Long, List<Long>> load = sqlContext
 				.sql("SELECT * FROM user4item").javaRDD()
 				.mapToPair(new PairFunction<Row, Long, List<Long>>() {

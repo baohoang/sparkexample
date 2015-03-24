@@ -2,7 +2,6 @@ package vn.wss.spark.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 public class UserForItem implements Serializable {
 	/**
@@ -28,7 +27,7 @@ public class UserForItem implements Serializable {
 		this.idtem = idtem;
 	}
 
-	public List<Long> getListuser() {
+	public ArrayList<Long> getListuser() {
 		return listuser;
 	}
 
