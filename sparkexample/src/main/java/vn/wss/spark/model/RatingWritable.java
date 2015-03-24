@@ -30,7 +30,9 @@ public class RatingWritable implements Writable {
 
 	public void readFields(DataInput in) throws IOException {
 		// TODO Auto-generated method stub
+		id=new LongWritable();
 		id.readFields(in);
+		rate=new DoubleWritable();
 		rate.readFields(in);
 	}
 
