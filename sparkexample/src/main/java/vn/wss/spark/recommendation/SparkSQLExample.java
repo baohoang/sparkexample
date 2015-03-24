@@ -63,9 +63,8 @@ public class SparkSQLExample {
 				+ dataFrame.columns()[1]);
 		logger.info("creating ...");
 		dataFrame.registerTempTable("user4item");
-		JavaRDD<UserForItem> load = sqlContext
-				.sql("SELECT * FROM user4item").javaRDD()
-				.map(new Function<Row, UserForItem>() {
+		JavaRDD<UserForItem> load = sqlContext.sql("SELECT * FROM user4item")
+				.javaRDD().map(new Function<Row, UserForItem>() {
 
 					@Override
 					public UserForItem call(Row v1) throws Exception {
