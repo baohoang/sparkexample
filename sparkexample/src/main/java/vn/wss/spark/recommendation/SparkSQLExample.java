@@ -20,6 +20,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 
 import scala.Tuple2;
+import vn.wss.spark.model.ArrayLongList;
 import vn.wss.spark.model.UserForItem;
 
 public class SparkSQLExample {
@@ -34,24 +35,24 @@ public class SparkSQLExample {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		logger.info("reading ...");
-		JavaPairRDD<LongWritable, TupleWritable> rawData = sc.sequenceFile(
-				USER_ITEM, LongWritable.class, TupleWritable.class);
-		logger.info("read item"+rawData.count());
+		JavaPairRDD<LongWritable, ArrayLongList> rawData = sc.sequenceFile(
+				USER_ITEM, LongWritable.class, ArrayLongList.class);
+		logger.info("read item" + rawData.count());
 		JavaRDD<UserForItem> user4item = rawData
-				.map(new Function<Tuple2<LongWritable, TupleWritable>, UserForItem>() {
+				.map(new Function<Tuple2<LongWritable, ArrayLongList>, UserForItem>() {
 
 					@Override
 					public UserForItem call(
-							Tuple2<LongWritable, TupleWritable> t)
+							Tuple2<LongWritable, ArrayLongList> t)
 							throws Exception {
 						// TODO Auto-generated method stub
 						long key = t._1().get();
-						TupleWritable t2 = t._2();
-						ArrayList<Long> list = new ArrayList<>();
-						Iterator<Writable> it = t2.iterator();
-						while (it.hasNext()) {
-							LongWritable v = (LongWritable) it.next();
-							list.add(v.get());
+						ArrayLongList t2 = t._2();
+						LongWritable[] it = t2.getArr();
+						int size = t2.getSize().get();
+						ArrayList<Long> list = new ArrayList<Long>();
+						for (int i = 0; i < size; i++) {
+							list.add(it[i].get());
 						}
 						return new UserForItem(key, list);
 					}
@@ -61,7 +62,7 @@ public class SparkSQLExample {
 				UserForItem.class);
 		dataFrame.registerTempTable("user4item");
 		logger.info("columns name: " + dataFrame.columns().toString());
-		
+
 		JavaPairRDD<Long, List<Long>> load = sqlContext
 				.sql("SELECT * FROM user4item").javaRDD()
 				.mapToPair(new PairFunction<Row, Long, List<Long>>() {
