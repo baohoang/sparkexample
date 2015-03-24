@@ -331,7 +331,6 @@ public class Recommendation implements Serializable {
 	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf();
 		conf.setAppName("Recommendation Trailer");
-		conf.set("spark.executor.memory", "1g");
 		// conf.setMaster(args[0]);
 		Recommendation recommendation = new Recommendation(conf);
 		recommendation.run();
