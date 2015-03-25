@@ -5,15 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-
-
 import org.apache.spark.api.java.function.Function;
-
-import vn.wss.spark.model.Tracking;
-
 import com.datastax.spark.connector.japi.CassandraRow;
-
-import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
+import static com.datastax.spark.connector.japi.CassandraJavaUtil.*;
 
 public class CassandraConnection {
 	
