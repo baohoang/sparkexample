@@ -7,6 +7,8 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
 
+import org.apache.spark.api.java.function.Function;
+
 import com.datastax.spark.connector.japi.CassandraRow;
 
 import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
@@ -21,7 +23,14 @@ public class CassandraConnection {
 			JavaSparkContext sc = new JavaSparkContext(conf);
 	    // entire table as an RDD
 	    // assumes your table test was created as CREATE TABLE test.kv(key text PRIMARY KEY, value int);
-	    JavaRDD<CassandraRow> data = javaFunctions(sc).cassandraTable("tracking" , "tracking");
+	    JavaRDD<String> data = javaFunctions(sc).cassandraTable("tracking" , "tracking").map(new Function<CassandraRow, String>() {
+
+			@Override
+			public String call(CassandraRow v1) throws Exception {
+				// TODO Auto-generated method stub
+				return v1.toString();
+			}
+		});
 	    
 	    logger.info("completed ..."+ data.count());
 	    sc.stop();
