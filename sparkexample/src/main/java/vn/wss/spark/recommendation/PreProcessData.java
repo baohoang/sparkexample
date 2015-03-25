@@ -40,11 +40,18 @@ public class PreProcessData {
 		Date now = new Date();
 		while (!date.after(now)) {
 			Date d1 = DateUtils.getStartOfDay(date);
-			Date d2 = DateUtils.getStartOfDay(date);
+			Date d2 = DateUtils.getEndOfDay(date);
+			Calendar c = Calendar.getInstance();
+			c.setTime(date);
+			int year = c.get(Calendar.YEAR);
+			int month = c.get(Calendar.MONTH);
+			int day = c.get(Calendar.DAY_OF_MONTH);
+			int year_month = year * 100 + month;
+			String path = "/spark/" + year + "/" + month + "/" + day;
 			JavaPairRDD<LongWritable, LongWritable> data = javaFunctions(sc)
 					.cassandraTable("tracking", "tracking")
-					.where("year_month = ? AND at > ? AND at < ?", 201501, d1,
-							d2)
+					.where("year_month = ? AND at > ? AND at < ?", year_month,
+							d1, d2)
 					.mapToPair(
 							new PairFunction<CassandraRow, LongWritable, LongWritable>() {
 
@@ -68,13 +75,9 @@ public class PreProcessData {
 								}
 							});
 			logger.info(date.toString() + " has completed with " + data.count());
-			DateTime dateTime = new DateTime(date.getTime(),
-					DateTimeZone.forOffsetHours(7));
-			String path = "/spark/" + dateTime.getYear() + "/"
-					+ dateTime.getMonthOfYear() + "/"
-					+ dateTime.getDayOfMonth();
-			data.saveAsHadoopFile(path, LongWritable.class,
-					LongWritable.class, SequenceFileOutputFormat.class);
+
+			data.saveAsHadoopFile(path, LongWritable.class, LongWritable.class,
+					SequenceFileOutputFormat.class);
 			date = DateUtils.addDays(date, 1);
 		}
 		sc.stop();
