@@ -57,7 +57,7 @@ public class Recommendation implements Serializable {
 		configuration.set("fs.file.impl",
 				org.apache.hadoop.fs.LocalFileSystem.class.getName());
 		FileSystem hdfs = FileSystem.get(
-				URI.create("hdfs://spark-slave-2:9000"), configuration);
+				URI.create("hdfs://master:9000"), configuration);
 		if (hdfs.exists(new Path(RESULT_PATH))) {
 			hdfs.delete(new Path(RESULT_PATH), true);
 		}

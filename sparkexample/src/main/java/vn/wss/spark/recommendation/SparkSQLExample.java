@@ -18,7 +18,6 @@ import org.apache.spark.sql.SQLContext;
 import scala.Tuple2;
 import vn.wss.spark.model.ArrayLongListWritable;
 import vn.wss.spark.model.LongList;
-import vn.wss.spark.model.Rating;
 import vn.wss.spark.model.UserForItem;
 
 public class SparkSQLExample {
