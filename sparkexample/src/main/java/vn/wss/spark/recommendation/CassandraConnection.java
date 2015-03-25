@@ -22,7 +22,8 @@ public class CassandraConnection {
 	    // entire table as an RDD
 	    // assumes your table test was created as CREATE TABLE test.kv(key text PRIMARY KEY, value int);
 	    JavaRDD<CassandraRow> data = javaFunctions(sc).cassandraTable("tracking" , "tracking");
-	    logger.info("completed ..");
+	    
+	    logger.info("completed ..."+ data.count());
 	    sc.stop();
 	    // print some basic stats
 	}
