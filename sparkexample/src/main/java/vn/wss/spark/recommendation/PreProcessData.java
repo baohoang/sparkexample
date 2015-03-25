@@ -1,6 +1,6 @@
 package vn.wss.spark.recommendation;
 
-import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
+import static com.datastax.spark.connector.japi.CassandraJavaUtil.*;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -21,6 +21,8 @@ import vn.wss.util.DateUtils;
 import vn.wss.util.StringUtils;
 
 import com.datastax.spark.connector.japi.CassandraRow;
+import com.datastax.spark.connector.japi.rdd.CassandraJavaPairRDD;
+import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
 
 public class PreProcessData {
 	private static final Logger logger = LogManager
@@ -34,6 +36,9 @@ public class PreProcessData {
 		// entire table as an RDD
 		// assumes your table test was created as CREATE TABLE test.kv(key text
 		// PRIMARY KEY, value int);
+		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
+				.cassandraTable("tracking", "tracking");
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2015, 1, 1, 0, 0, 0);
 		Date date = calendar.getTime();
@@ -48,8 +53,7 @@ public class PreProcessData {
 			int day = c.get(Calendar.DAY_OF_MONTH);
 			int year_month = year * 100 + month;
 			String path = "/spark/" + year + "/" + month + "/" + day;
-			JavaPairRDD<LongWritable, LongWritable> data = javaFunctions(sc)
-					.cassandraTable("tracking", "tracking")
+			JavaPairRDD<LongWritable, LongWritable> data = rawData
 					.where("year_month = ? AND at > ? AND at < ?", year_month,
 							d1, d2)
 					.mapToPair(
