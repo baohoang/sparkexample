@@ -1,6 +1,6 @@
 package vn.wss.spark.recommendation;
 
-import static com.datastax.spark.connector.japi.CassandraJavaUtil.*;
+import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -13,15 +13,12 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.PairFunction;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import scala.Tuple2;
 import vn.wss.util.DateUtils;
 import vn.wss.util.StringUtils;
 
 import com.datastax.spark.connector.japi.CassandraRow;
-import com.datastax.spark.connector.japi.rdd.CassandraJavaPairRDD;
 import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
 
 public class PreProcessData {
@@ -37,7 +34,7 @@ public class PreProcessData {
 		// assumes your table test was created as CREATE TABLE test.kv(key text
 		// PRIMARY KEY, value int);
 		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
-				.cassandraTable("tracking", "tracking");
+				.cassandraTable("tracking", "tracking").select("year_month","at","uri","user_id");
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2015, 1, 1, 0, 0, 0);
@@ -78,7 +75,7 @@ public class PreProcessData {
 									return null;
 								}
 							});
-			logger.info(date.toString() + " has completed with " + data.count());
+//			logger.info(date.toString() + " has completed with " + data.count());
 
 			data.saveAsHadoopFile(path, LongWritable.class, LongWritable.class,
 					SequenceFileOutputFormat.class);
