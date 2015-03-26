@@ -31,20 +31,31 @@ public class WordSearch {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
 				.cassandraTable("tracking", "tracking").select("uri");
-		JavaRDD<String> raw = rawData.map(new Function<CassandraRow, String>() {
+		JavaRDD<CassandraRow> raw = rawData
+				.filter(new Function<CassandraRow, Boolean>() {
+
+					@Override
+					public Boolean call(CassandraRow v1) throws Exception {
+						// TODO Auto-generated method stub
+						String uri = v1.getString("uri");
+						String wordSearch = StringUtils.getWordSearch(uri);
+						if (wordSearch != null) {
+							return true;
+						}
+						return false;
+					}
+				});
+		JavaRDD<String> raw1 = raw.map(new Function<CassandraRow, String>() {
 
 			@Override
 			public String call(CassandraRow v1) throws Exception {
 				// TODO Auto-generated method stub
 				String uri = v1.getString("uri");
 				String wordSearch = StringUtils.getWordSearch(uri);
-				if (wordSearch != null) {
-					return wordSearch;
-				}
-				return null;
+				return wordSearch;
 			}
 		});
-		JavaPairRDD<String, Integer> data = raw
+		JavaPairRDD<String, Integer> data = raw1
 				.mapToPair(new PairFunction<String, String, Integer>() {
 
 					@Override
