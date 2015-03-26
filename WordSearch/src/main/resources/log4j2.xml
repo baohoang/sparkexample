@@ -6,7 +6,7 @@
 			<ThresholdFilter level="INFO" onMatch="ACCEPT"
 				onMismatch="DENY" />
 		</File>
-		<RollingFile name="RollingFile" fileName="/home/hdspark/log4j/log_tracking/tracking_by_day.log"
+		<RollingFile name="RollingFile" fileName="/home/hdspark/log4j/log_tracking/word_search.log"
 			filePattern="/home/hdspark/log4j/log_recommendation/recommendation_by_day.log.%d{yyyy-MM-dd}">
 			<PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
 			<Policies>
