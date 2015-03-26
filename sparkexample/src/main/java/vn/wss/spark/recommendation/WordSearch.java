@@ -68,7 +68,7 @@ public class WordSearch {
 						return null;
 					}
 				});
-		List<Tuple2<String, Integer>> map = data.reduceByKey(
+		JavaPairRDD<String, Integer> map = data.reduceByKey(
 				new Function2<Integer, Integer, Integer>() {
 
 					@Override
@@ -77,20 +77,22 @@ public class WordSearch {
 						// TODO Auto-generated method stub
 						return v1 + v2;
 					}
-				}).collect();
-		String path = "/home/hdspark/wordsearch";
-
-		File f = new File(path, "wordsearchresult.txt");
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-			for (Tuple2<String, Integer> e : map) {
-				bw.write(e._1() + " " + e._2());
-			}
-			bw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				});
+		logger.info("count :"+map.count());
+		
+//		String path = "/home/hdspark/wordsearch";
+//
+//		File f = new File(path, "wordsearchresult.txt");
+//		try {
+//			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+//			for (Tuple2<String, Integer> e : map) {
+//				bw.write(e._1() + " " + e._2());
+//			}
+//			bw.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		sc.stop();
 	}
 }
