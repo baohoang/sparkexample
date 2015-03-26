@@ -39,22 +39,22 @@ public class WordSearch {
 					@Override
 					public String call(CassandraRow v1) throws Exception {
 						// TODO Auto-generated method stub
-						return v1.getString("uri");
+						String wordSearch = StringUtils.getWordSearch(v1
+								.getString("uri"));
+						if (wordSearch != null) {
+							return wordSearch;
+						}
+						return "--x";
+					}
+				}).filter(new Function<String, Boolean>() {
+
+					@Override
+					public Boolean call(String v1) throws Exception {
+						// TODO Auto-generated method stub
+						return v1.equals("--x");
 					}
 				});
-		JavaRDD<String> d1 = data.map(new Function<String, String>() {
-
-			@Override
-			public String call(String v1) throws Exception {
-				// TODO Auto-generated method stub
-				String wordSearch = StringUtils.getWordSearch(v1);
-				if (wordSearch != null) {
-					return wordSearch;
-				}
-				return null;
-			}
-		}).cache();
-		JavaPairRDD<String, Integer> dataMap = d1
+		JavaPairRDD<String, Integer> dataMap = data
 				.mapToPair(new PairFunction<String, String, Integer>() {
 
 					@Override
