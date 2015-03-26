@@ -48,12 +48,13 @@ public class WordSearch {
 							String wordSearch = StringUtils.getWordSearch(uri);
 							logger.info("wordSearch: " + wordSearch);
 							if (wordSearch != null) {
-								logger.info("# null: ");
+								logger.info("# null");
 								return new Tuple2<String, Integer>(wordSearch,
 										1);
 							}
 						}
-						return null;
+						return new Tuple2<String, Integer>("",
+								0);
 					}
 				});
 		Map<String, Integer> map = data.reduceByKey(
