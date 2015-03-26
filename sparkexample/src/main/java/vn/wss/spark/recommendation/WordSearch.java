@@ -62,14 +62,23 @@ public class WordSearch {
 								s1 = m_f2.group(1);
 								m_f2 = filter2.matcher(s1);
 							}
+							// logger.i
 							return new Tuple2<String, Integer>(
 									s1.toLowerCase(), 1);
 						}
-						return null;
+						return new Tuple2<String, Integer>("-x", 0);
+					}
+				}).filter(new Function<Tuple2<String, Integer>, Boolean>() {
+
+					@Override
+					public Boolean call(Tuple2<String, Integer> v1)
+							throws Exception {
+						// TODO Auto-generated method stub
+						return v1._1().equals("-x");
 					}
 				});
-		JavaPairRDD<String, Integer> map = data.reduceByKey(
-				new Function2<Integer, Integer, Integer>() {
+		JavaPairRDD<String, Integer> map = data
+				.reduceByKey(new Function2<Integer, Integer, Integer>() {
 
 					@Override
 					public Integer call(Integer v1, Integer v2)
@@ -78,21 +87,21 @@ public class WordSearch {
 						return v1 + v2;
 					}
 				});
-		logger.info("count :"+map.count());
-		
-//		String path = "/home/hdspark/wordsearch";
-//
-//		File f = new File(path, "wordsearchresult.txt");
-//		try {
-//			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-//			for (Tuple2<String, Integer> e : map) {
-//				bw.write(e._1() + " " + e._2());
-//			}
-//			bw.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		logger.info("count :" + map.count());
+
+		// String path = "/home/hdspark/wordsearch";
+		//
+		// File f = new File(path, "wordsearchresult.txt");
+		// try {
+		// BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+		// for (Tuple2<String, Integer> e : map) {
+		// bw.write(e._1() + " " + e._2());
+		// }
+		// bw.close();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		sc.stop();
 	}
 }
