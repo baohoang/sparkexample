@@ -29,7 +29,7 @@ public class WordSearch {
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
-				.cassandraTable("tracking", "tracking").select("uri");
+				.cassandraTable("tracking", "tracking");
 		JavaPairRDD<String, Integer> data = rawData
 				.mapToPair(new PairFunction<CassandraRow, String, Integer>() {
 
