@@ -56,8 +56,8 @@ public class Recommendation implements Serializable {
 				org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
 		configuration.set("fs.file.impl",
 				org.apache.hadoop.fs.LocalFileSystem.class.getName());
-		FileSystem hdfs = FileSystem.get(
-				URI.create("hdfs://master:9000"), configuration);
+		FileSystem hdfs = FileSystem.get(URI.create("hdfs://master:9000"),
+				configuration);
 		if (hdfs.exists(new Path(RESULT_PATH))) {
 			hdfs.delete(new Path(RESULT_PATH), true);
 		}
@@ -72,7 +72,8 @@ public class Recommendation implements Serializable {
 		// calculate similar C
 		// calculate A,B
 
-		JavaPairRDD<Long, Long> rawData = getData(sc);
+		String path="";
+		JavaPairRDD<Long, Long> rawData = getData(sc,path);
 		JavaPairRDD<Long, Long> a = calculate(rawData);
 		JavaPairRDD<Tuple2<Long, Long>, Long> c = calculateSimilar(rawData);
 		JavaPairRDD<Long, Tuple2<Long, Double>> res = fusion(c, a);
@@ -221,7 +222,8 @@ public class Recommendation implements Serializable {
 										key, value);
 							}
 						}).saveAsHadoopFile(USER_ITEM, LongWritable.class,
-						ArrayLongListWritable.class, SequenceFileOutputFormat.class);
+						ArrayLongListWritable.class,
+						SequenceFileOutputFormat.class);
 		logger.info("save file user4item");
 		JavaPairRDD<Long, Long> countMapper = userListForItem
 				.mapToPair(new PairFunction<Tuple2<Long, Iterable<Long>>, Long, Long>() {
@@ -278,7 +280,8 @@ public class Recommendation implements Serializable {
 										key, value);
 							}
 						}).saveAsHadoopFile(ITEM_USER, LongWritable.class,
-						ArrayLongListWritable.class, SequenceFileOutputFormat.class);
+						ArrayLongListWritable.class,
+						SequenceFileOutputFormat.class);
 		logger.info("save file item4user");
 		JavaPairRDD<Long, Long> similarList = itemListForUser
 				.flatMapToPair(new PairFlatMapFunction<Tuple2<Long, Iterable<Long>>, Long, Long>() {
@@ -341,21 +344,19 @@ public class Recommendation implements Serializable {
 		recommendation.run();
 	}
 
-	public JavaPairRDD<Long, Long> getData(JavaSparkContext sc) {
-		JavaRDD<String> lines = sc.textFile(RAW_DATA_FILE, 1);
+	public JavaPairRDD<Long, Long> getData(JavaSparkContext sc, String path) {
+		JavaPairRDD<LongWritable, LongWritable> lines = sc.sequenceFile(path,
+				LongWritable.class, LongWritable.class);
 		JavaPairRDD<Long, Long> rawData = lines
-				.mapToPair(new PairFunction<String, Long, Long>() {
+				.mapToPair(new PairFunction<Tuple2<LongWritable, LongWritable>, Long, Long>() {
 
 					@Override
-					public Tuple2<Long, Long> call(String t) throws Exception {
+					public Tuple2<Long, Long> call(
+							Tuple2<LongWritable, LongWritable> t)
+							throws Exception {
 						// TODO Auto-generated method stub
-						String[] res = t.split(",");
-						if (res.length != 2) {
-							return null;
-						}
-						Long t1 = Long.parseLong(res[0]);
-						Long t2 = Long.parseLong(res[1]);
-						Tuple2<Long, Long> tp = new Tuple2<Long, Long>(t1, t2);
+						Tuple2<Long, Long> tp = new Tuple2<Long, Long>(t._1()
+								.get(), t._2().get());
 						return tp;
 					}
 				});

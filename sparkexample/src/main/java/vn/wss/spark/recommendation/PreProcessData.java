@@ -30,9 +30,6 @@ public class PreProcessData {
 				"spark.cassandra.connection.host", "10.0.0.11");
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		// entire table as an RDD
-		// assumes your table test was created as CREATE TABLE test.kv(key text
-		// PRIMARY KEY, value int);
 		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
 				.cassandraTable("tracking", "tracking").select("year_month","at","uri","user_id");
 
@@ -82,6 +79,5 @@ public class PreProcessData {
 			date = DateUtils.addDays(date, 1);
 		}
 		sc.stop();
-		// print some basic stats
 	}
 }
