@@ -34,7 +34,7 @@ public class WordSearch {
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		JavaPairRDD<String, Integer> data = javaFunctions(sc).cassandraTable(
-				"tracking", "tracking").mapToPair(
+				"tracking", "tracking").where("year_month IN (?,?,?)",201501,201502,201503).mapToPair(
 				new PairFunction<CassandraRow, String, Integer>() {
 
 					@Override
