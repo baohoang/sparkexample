@@ -48,6 +48,7 @@ public class WordSearch {
 							String wordSearch = StringUtils.getWordSearch(uri);
 							logger.info("wordSearch: " + wordSearch);
 							if (wordSearch != null) {
+								logger.info("# null: ");
 								return new Tuple2<String, Integer>(wordSearch,
 										1);
 							}
