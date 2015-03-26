@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,38 +34,40 @@ public class WordSearch {
 				"spark.cassandra.connection.host", "10.0.0.11");
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		JavaRDD<String> data = javaFunctions(sc)
+		JavaPairRDD<String, Integer> data = javaFunctions(sc)
 				.cassandraTable("tracking", "tracking").select("uri")
-				.map(new Function<CassandraRow, String>() {
+				.mapToPair(new PairFunction<CassandraRow, String, Integer>() {
 
 					@Override
-					public String call(CassandraRow v1) throws Exception {
-						// TODO Auto-generated method stub
-						String wordSearch = StringUtils.getWordSearch(v1
-								.getString("uri"));
-						if (wordSearch != null) {
-							return wordSearch;
-						}
-						return "--x";
-					}
-				}).filter(new Function<String, Boolean>() {
-
-					@Override
-					public Boolean call(String v1) throws Exception {
-						// TODO Auto-generated method stub
-						return v1.equals("--x");
-					}
-				});
-		JavaPairRDD<String, Integer> dataMap = data
-				.mapToPair(new PairFunction<String, String, Integer>() {
-
-					@Override
-					public Tuple2<String, Integer> call(String v1)
+					public Tuple2<String, Integer> call(CassandraRow t)
 							throws Exception {
-						return new Tuple2<String, Integer>(v1, 1);
+						// TODO Auto-generated method stub
+						String uri = t.getString("uri");
+						String regex = ".*\\/s\\/(.*)\\.htm";
+						String regex_1 = "cat-[0-9]*\\/(.*)";
+						String regex_2 = "(.*)\\/.*";
+						Pattern f1 = Pattern.compile(regex);
+						Matcher m = f1.matcher(uri);
+						if (m.matches()) {
+							Pattern filter1 = Pattern.compile(regex_1);
+							String s1 = m.group(1);
+							Matcher m_f1 = filter1.matcher(s1);
+							if (m_f1.matches()) {
+								s1 = m_f1.group(1);
+							}
+							Pattern filter2 = Pattern.compile(regex_2);
+							Matcher m_f2 = filter2.matcher(s1);
+							while (m_f2.matches()) {
+								s1 = m_f2.group(1);
+								m_f2 = filter2.matcher(s1);
+							}
+							return new Tuple2<String, Integer>(
+									s1.toLowerCase(), 1);
+						}
+						return null;
 					}
 				});
-		Map<String, Integer> map = dataMap.reduceByKey(
+		Map<String, Integer> map = data.reduceByKey(
 				new Function2<Integer, Integer, Integer>() {
 
 					@Override
