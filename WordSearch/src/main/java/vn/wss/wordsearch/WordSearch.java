@@ -33,15 +33,24 @@ public class WordSearch {
 				"spark.cassandra.connection.host", "10.0.0.11");
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		JavaPairRDD<String, Integer> data = javaFunctions(sc).cassandraTable(
-				"tracking", "tracking").where("year_month IN (?,?,?)",201501,201502,201503).mapToPair(
-				new PairFunction<CassandraRow, String, Integer>() {
+		JavaRDD<String> data = javaFunctions(sc)
+				.cassandraTable("tracking", "tracking").select("uri")
+				.map(new Function<CassandraRow, String>() {
 
 					@Override
-					public Tuple2<String, Integer> call(CassandraRow v1)
+					public String call(CassandraRow v1) throws Exception {
+						// TODO Auto-generated method stub
+						return v1.getString("uri");
+					}
+				});
+		JavaPairRDD<String, Integer> dataMap = data
+				.mapToPair(new PairFunction<String, String, Integer>() {
+
+					@Override
+					public Tuple2<String, Integer> call(String v1)
 							throws Exception {
 						// TODO Auto-generated method stub
-						String uri = v1.getString("uri");
+						String uri = v1;
 						if (uri != null) {
 							String wordSearch = StringUtils.getWordSearch(uri);
 							if (wordSearch != null) {
@@ -52,7 +61,7 @@ public class WordSearch {
 						return null;
 					}
 				});
-		Map<String, Integer> map = data.reduceByKey(
+		Map<String, Integer> map = dataMap.reduceByKey(
 				new Function2<Integer, Integer, Integer>() {
 
 					@Override
