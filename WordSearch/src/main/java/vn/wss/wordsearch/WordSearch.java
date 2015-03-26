@@ -43,22 +43,25 @@ public class WordSearch {
 						return v1.getString("uri");
 					}
 				});
-		JavaPairRDD<String, Integer> dataMap = data
+		JavaRDD<String> d1 = data.map(new Function<String, String>() {
+
+			@Override
+			public String call(String v1) throws Exception {
+				// TODO Auto-generated method stub
+				String wordSearch = StringUtils.getWordSearch(v1);
+				if (wordSearch != null) {
+					return wordSearch;
+				}
+				return null;
+			}
+		});
+		JavaPairRDD<String, Integer> dataMap = d1
 				.mapToPair(new PairFunction<String, String, Integer>() {
 
 					@Override
 					public Tuple2<String, Integer> call(String v1)
 							throws Exception {
-						// TODO Auto-generated method stub
-						String uri = v1;
-						if (uri != null) {
-							String wordSearch = StringUtils.getWordSearch(uri);
-							if (wordSearch != null) {
-								return new Tuple2<String, Integer>(wordSearch,
-										1);
-							}
-						}
-						return null;
+						return new Tuple2<String, Integer>(v1, 1);
 					}
 				});
 		Map<String, Integer> map = dataMap.reduceByKey(
