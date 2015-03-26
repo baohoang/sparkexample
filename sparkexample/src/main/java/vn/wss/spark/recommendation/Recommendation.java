@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
+import org.joda.time.DateTime;
 
 import scala.Tuple2;
 import vn.wss.spark.model.ArrayLongListWritable;
@@ -72,6 +74,7 @@ public class Recommendation implements Serializable {
 		// calculate similar C
 		// calculate A,B
 
+		Date date=new DateTime(2015,1,1, 0, 0,0).toDate();
 		String path="";
 		JavaPairRDD<Long, Long> rawData = getData(sc,path);
 		JavaPairRDD<Long, Long> a = calculate(rawData);

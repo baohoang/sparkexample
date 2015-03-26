@@ -53,8 +53,7 @@ public class WordSearch {
 										1);
 							}
 						}
-						return new Tuple2<String, Integer>("",
-								0);
+						return null;
 					}
 				});
 		Map<String, Integer> map = data.reduceByKey(
@@ -80,6 +79,6 @@ public class WordSearch {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		sc.stop();
 	}
 }

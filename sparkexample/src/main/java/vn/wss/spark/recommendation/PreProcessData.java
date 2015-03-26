@@ -31,15 +31,16 @@ public class PreProcessData {
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
-				.cassandraTable("tracking", "tracking").select("year_month","at","uri","user_id");
+				.cassandraTable("tracking", "tracking").select("year_month",
+						"at", "uri", "user_id");
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2015, 1, 1, 0, 0, 0);
 		Date date = calendar.getTime();
 		Date now = new Date();
 		while (!date.after(now)) {
-			Date d1 = DateUtils.getStartOfDay(date);
-			Date d2 = DateUtils.getEndOfDay(date);
+			// Date d1 = DateUtils.getStartOfDay(date);
+			// Date d2 = DateUtils.getEndOfDay(date);
 			Calendar c = Calendar.getInstance();
 			c.setTime(date);
 			int year = c.get(Calendar.YEAR);
@@ -47,6 +48,9 @@ public class PreProcessData {
 			int day = c.get(Calendar.DAY_OF_MONTH);
 			int year_month = year * 100 + month;
 			String path = "/spark/" + year + "/" + month + "/" + day;
+			String d1 = year + "-" + month + "-" + day + " " + "0:0:0+0700";
+			String d2 = year + "-" + month + "-" + (day + 1) + " "
+					+ "0:0:0+0700";
 			JavaPairRDD<LongWritable, LongWritable> data = rawData
 					.where("year_month = ? AND at > ? AND at < ?", year_month,
 							d1, d2)
@@ -72,7 +76,8 @@ public class PreProcessData {
 									return null;
 								}
 							});
-//			logger.info(date.toString() + " has completed with " + data.count());
+			// logger.info(date.toString() + " has completed with " +
+			// data.count());
 
 			data.saveAsHadoopFile(path, LongWritable.class, LongWritable.class,
 					SequenceFileOutputFormat.class);
