@@ -1,4 +1,4 @@
-package vn.wss.wordsearch;
+package vn.wss.spark.recommendation;
 
 import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
 
@@ -20,10 +20,9 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
-import tachyon.thrift.WorkerService.Processor.returnSpace;
+import vn.wss.util.StringUtils;
 
 import com.datastax.spark.connector.japi.CassandraRow;
-import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
 
 public class WordSearch {
 	private static final Logger logger = LogManager.getLogger(WordSearch.class);
