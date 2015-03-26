@@ -18,6 +18,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
+import tachyon.thrift.WorkerService.Processor.returnSpace;
 
 import com.datastax.spark.connector.japi.CassandraRow;
 import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
@@ -39,8 +40,10 @@ public class WordSearch {
 						// TODO Auto-generated method stub
 						String uri = v1.getString("uri");
 						String wordSearch = StringUtils.getWordSearch(uri);
-
-						return new Tuple2<String, Integer>(wordSearch, 1);
+						if (wordSearch != null) {
+							return new Tuple2<String, Integer>(wordSearch, 1);
+						}
+						return null;
 					}
 				});
 		Map<String, Integer> map = data.reduceByKey(
