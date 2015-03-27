@@ -74,7 +74,7 @@ public class WordSearch {
 					public Boolean call(Tuple2<String, Integer> v1)
 							throws Exception {
 						// TODO Auto-generated method stub
-						return v1._1().equals("-x");
+						return !v1._1().equals("-x");
 					}
 				});
 		JavaPairRDD<String, Integer> map = data
