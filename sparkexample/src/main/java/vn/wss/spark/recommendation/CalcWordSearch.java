@@ -2,6 +2,10 @@ package vn.wss.spark.recommendation;
 
 import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -22,38 +26,18 @@ public class CalcWordSearch {
 	private static final Logger logger = LogManager.getLogger(WordSearch.class);
 
 	public static void main(String[] args) {
-		SparkConf conf = new SparkConf(true);
-
-		JavaSparkContext sc = new JavaSparkContext(conf);
-		Map<String,Integer> map=sc.textFile("/spark/wordsearch2", 1)
-				.filter(new Function<String, Boolean>() {
-
-					@Override
-					public Boolean call(String v1) throws Exception {
-						// TODO Auto-generated method stub
-						return v1.startsWith("http://websosanh.vn/s/");
-					}
-				}).mapToPair(new PairFunction<String, String, Integer>() {
-
-					@Override
-					public Tuple2<String, Integer> call(String t)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return new Tuple2<String, Integer>(StringUtils
-								.getWordSearch(t), 1);
-					}
-				}).reduceByKey(new Function2<Integer, Integer, Integer>() {
-					
-					@Override
-					public Integer call(Integer v1, Integer v2) throws Exception {
-						// TODO Auto-generated method stub
-						return v1+v2;
-					}
-				}).collectAsMap();
-		
-		for (Entry<String, Integer> e : map.entrySet()) {
-			
-		}
-		sc.stop();
+//		File f = new File("/home/hdspark/wordcount/word.txt");
+//		BufferedReader brItem = new BufferedReader(new FileReader(f));
+//		String s = null;
+//		
+//		Map<Long, String> listItems = new HashMap<Long, String>();
+//		while ((s = brItem.readLine()) != null) {
+//			String st[] = s.split(" ");
+//			long id = Long.valueOf(st[0]);
+//			String uri = st[1];
+//			listItems.put(id, uri);
+//		}
+//		brItem.close();
+//		return listItems;
 	}
 }

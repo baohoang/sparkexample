@@ -40,7 +40,6 @@ public class WordSearch {
 		Map<String, Integer> map = javaFunctions(sc)
 				.cassandraTable("tracking", "tracking")
 				.select("year_month", "at", "uri")
-				.where("year_month = ?", 201502)
 				.map(new Function<CassandraRow, String>() {
 
 					@Override
@@ -81,9 +80,9 @@ public class WordSearch {
 		String path = "/home/hdspark/wordcount";
 		File f = new File(path, "word.txt");
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
 			for (Entry<String, Integer> e : map.entrySet()) {
-				bw.write(e.getKey() + ", " + e.getValue());
+				bw.write(e.getKey() + ", " + e.getValue()+"\n");
 			}
 			bw.close();
 		} catch (IOException e1) {
