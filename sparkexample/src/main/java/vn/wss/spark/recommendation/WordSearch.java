@@ -23,6 +23,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
+import tachyon.thrift.WorkerService.Processor.returnSpace;
 import vn.wss.util.StringUtils;
 
 import com.datastax.spark.connector.japi.CassandraRow;
@@ -37,44 +38,26 @@ public class WordSearch {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		JavaPairRDD<String, Integer> data = javaFunctions(sc)
 				.cassandraTable("tracking", "tracking").select("uri")
-				.mapToPair(new PairFunction<CassandraRow, String, Integer>() {
+				.filter(new Function<CassandraRow, Boolean>() {
+
+					@Override
+					public Boolean call(CassandraRow v1) throws Exception {
+						// TODO Auto-generated method stub
+						String uri = v1.getString(5);
+						if (uri.startsWith("http://websosanh.vm/s/")) {
+							return true;
+						}
+						return false;
+					}
+				}).mapToPair(new PairFunction<CassandraRow, String, Integer>() {
 
 					@Override
 					public Tuple2<String, Integer> call(CassandraRow t)
 							throws Exception {
 						// TODO Auto-generated method stub
-						String uri = t.getString("uri");
-						String regex = ".*\\/s\\/(.*)\\.htm";
-						String regex_1 = "cat-[0-9]*\\/(.*)";
-						String regex_2 = "(.*)\\/.*";
-						Pattern f1 = Pattern.compile(regex);
-						Matcher m = f1.matcher(uri);
-						if (m.matches()) {
-							Pattern filter1 = Pattern.compile(regex_1);
-							String s1 = m.group(1);
-							Matcher m_f1 = filter1.matcher(s1);
-							if (m_f1.matches()) {
-								s1 = m_f1.group(1);
-							}
-							Pattern filter2 = Pattern.compile(regex_2);
-							Matcher m_f2 = filter2.matcher(s1);
-							while (m_f2.matches()) {
-								s1 = m_f2.group(1);
-								m_f2 = filter2.matcher(s1);
-							}
-							// logger.i
-							return new Tuple2<String, Integer>(
-									s1.toLowerCase(), 1);
-						}
-						return new Tuple2<String, Integer>("-x", 0);
-					}
-				}).filter(new Function<Tuple2<String, Integer>, Boolean>() {
-
-					@Override
-					public Boolean call(Tuple2<String, Integer> v1)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return !v1._1().equals("-x");
+						String uri = t.getString(5);
+						return new Tuple2<String, Integer>(StringUtils
+								.getWordSearch(uri), 1);
 					}
 				});
 		JavaPairRDD<String, Integer> map = data
