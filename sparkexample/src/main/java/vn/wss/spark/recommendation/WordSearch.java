@@ -36,95 +36,97 @@ public class WordSearch {
 				"spark.cassandra.connection.host", "10.0.0.11");
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		// javaFunctions(sc).cassandraTable("tracking",
-		// "tracking").select("year_month","at","uri").where("year_month = ?",
-		// 201502).map(new Function<CassandraRow,String>() {
-		//
-		// @Override
-		// public String call(CassandraRow v1) throws Exception {
-		// // TODO Auto-generated method stub
-		// logger.info(v1.toString());
-		// return v1.toString();
-		// }
-		// }).saveAsTextFile("/spark/wordsearch2");
-		JavaPairRDD<String, Integer> mapper = sc.textFile("/spark/wordsearch")
-				.mapToPair(new PairFunction<String, String, Integer>() {
+		javaFunctions(sc).cassandraTable("tracking", "tracking")
+				.select("year_month", "at", "uri")
+				.where("year_month = ?", 201502)
+				.map(new Function<CassandraRow, String>() {
 
 					@Override
-					public Tuple2<String, Integer> call(String t)
-							throws Exception {
+					public String call(CassandraRow v1) throws Exception {
 						// TODO Auto-generated method stub
-						String regex = ".*, uri: (.*)}";
-						Pattern p = Pattern.compile(regex);
-						Matcher m = p.matcher(t);
-						if (m.matches()) {
-							String uri = m.group(1);
-							{
-								if (uri != null) {
-									String res = StringUtils.getWordSearch(uri);
-									if (res != null) {
-										return new Tuple2<String, Integer>(res,
-												1);
-									}
-								}
-							}
-						}
-						return null;
+						logger.info(v1.getString("uri"));
+						return v1.getString("uri");
 					}
-				});
-		// JavaPairRDD<String, Integer> data = javaFunctions(sc)
-		// .cassandraTable("tracking", "tracking").select("uri")
-		// .filter(new Function<CassandraRow, Boolean>() {
+				}).saveAsTextFile("/spark/wordsearch2");
+		// JavaPairRDD<String, Integer> mapper =
+		// sc.textFile("/spark/wordsearch")
+		// .mapToPair(new PairFunction<String, String, Integer>() {
 		//
 		// @Override
-		// public Boolean call(CassandraRow v1) throws Exception {
-		// // TODO Auto-generated method stub
-		// if (v1.contains("uri")) {
-		// String uri = v1.getString("uri");
-		// logger.info(uri);
-		// if (uri.startsWith("http://websosanh.vn/s/")) {
-		// return true;
-		// }
-		// }
-		// return false;
-		// }
-		// }).mapToPair(new PairFunction<CassandraRow, String, Integer>() {
-		//
-		// @Override
-		// public Tuple2<String, Integer> call(CassandraRow t)
+		// public Tuple2<String, Integer> call(String t)
 		// throws Exception {
 		// // TODO Auto-generated method stub
-		// String uri = t.getString("uri");
-		// return new Tuple2<String, Integer>(StringUtils
-		// .getWordSearch(uri), 1);
+		// String regex = ".*, uri: (.*)}";
+		// Pattern p = Pattern.compile(regex);
+		// Matcher m = p.matcher(t);
+		// if (m.matches()) {
+		// String uri = m.group(1);
+		// {
+		// if (uri != null) {
+		// String res = StringUtils.getWordSearch(uri);
+		// if (res != null) {
+		// return new Tuple2<String, Integer>(res,
+		// 1);
+		// }
+		// }
+		// }
+		// }
+		// return null;
 		// }
 		// });
-		JavaPairRDD<String, Integer> reducer = mapper
-				.reduceByKey(new Function2<Integer, Integer, Integer>() {
-
-					@Override
-					public Integer call(Integer v1, Integer v2)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return v1 + v2;
-					}
-				});
-		// logger.info("count :" + map.count());
-
-		String path = "/home/hdspark/wordsearch";
-		Map<String, Integer> map = reducer.collectAsMap();
-
-		File f = new File(path, "wordsearchresult.txt");
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-			for (Entry<String, Integer> e : map.entrySet()) {
-				bw.write(e.getKey() + " " + e.getValue());
-			}
-			bw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// // JavaPairRDD<String, Integer> data = javaFunctions(sc)
+		// // .cassandraTable("tracking", "tracking").select("uri")
+		// // .filter(new Function<CassandraRow, Boolean>() {
+		// //
+		// // @Override
+		// // public Boolean call(CassandraRow v1) throws Exception {
+		// // // TODO Auto-generated method stub
+		// // if (v1.contains("uri")) {
+		// // String uri = v1.getString("uri");
+		// // logger.info(uri);
+		// // if (uri.startsWith("http://websosanh.vn/s/")) {
+		// // return true;
+		// // }
+		// // }
+		// // return false;
+		// // }
+		// // }).mapToPair(new PairFunction<CassandraRow, String, Integer>() {
+		// //
+		// // @Override
+		// // public Tuple2<String, Integer> call(CassandraRow t)
+		// // throws Exception {
+		// // // TODO Auto-generated method stub
+		// // String uri = t.getString("uri");
+		// // return new Tuple2<String, Integer>(StringUtils
+		// // .getWordSearch(uri), 1);
+		// // }
+		// // });
+		// JavaPairRDD<String, Integer> reducer = mapper
+		// .reduceByKey(new Function2<Integer, Integer, Integer>() {
+		//
+		// @Override
+		// public Integer call(Integer v1, Integer v2)
+		// throws Exception {
+		// // TODO Auto-generated method stub
+		// return v1 + v2;
+		// }
+		// });
+		// // logger.info("count :" + map.count());
+		//
+		// String path = "/home/hdspark/wordsearch";
+		// Map<String, Integer> map = reducer.collectAsMap();
+		//
+		// File f = new File(path, "wordsearchresult.txt");
+		// try {
+		// BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+		// for (Entry<String, Integer> e : map.entrySet()) {
+		// bw.write(e.getKey() + " " + e.getValue());
+		// }
+		// bw.close();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		sc.stop();
 	}
 }
