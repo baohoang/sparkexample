@@ -43,8 +43,8 @@ public class WordSearch {
 					@Override
 					public Boolean call(CassandraRow v1) throws Exception {
 						// TODO Auto-generated method stub
-						String uri = v1.getString(5);
-						if (uri.startsWith("http://websosanh.vm/s/")) {
+						String uri = v1.getString("uri");
+						if (uri.startsWith("http://websosanh.vn/s/")) {
 							return true;
 						}
 						return false;
@@ -55,7 +55,7 @@ public class WordSearch {
 					public Tuple2<String, Integer> call(CassandraRow t)
 							throws Exception {
 						// TODO Auto-generated method stub
-						String uri = t.getString(5);
+						String uri = t.getString("uri");
 						return new Tuple2<String, Integer>(StringUtils
 								.getWordSearch(uri), 1);
 					}
