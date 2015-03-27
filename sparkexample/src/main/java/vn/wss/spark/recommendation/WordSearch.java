@@ -44,7 +44,7 @@ public class WordSearch {
 				logger.info(v1.toString());
 				return v1.toString();
 			}
-		}).saveAsTextFile("/spark/wordsearch");;
+		}).saveAsTextFile("/spark/wordsearch");
 //		JavaPairRDD<String, Integer> data = javaFunctions(sc)
 //				.cassandraTable("tracking", "tracking").select("uri")
 //				.filter(new Function<CassandraRow, Boolean>() {
