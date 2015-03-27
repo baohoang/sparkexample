@@ -43,10 +43,12 @@ public class WordSearch {
 					@Override
 					public Boolean call(CassandraRow v1) throws Exception {
 						// TODO Auto-generated method stub
-						String uri = v1.getString("uri");
-						logger.info(uri);
-						if (uri.startsWith("http://websosanh.vn/s/")) {
-							return true;
+						if (v1.contains("uri")) {
+							String uri = v1.getString("uri");
+							logger.info(uri);
+							if (uri.startsWith("http://websosanh.vn/s/")) {
+								return true;
+							}
 						}
 						return false;
 					}
