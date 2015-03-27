@@ -36,7 +36,7 @@ public class WordSearch {
 				"spark.cassandra.connection.host", "10.0.0.11");
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		javaFunctions(sc).cassandraTable("tracking", "tracking").select("year_month","at","uri").where("year_month = ?", 201501).map(new Function<CassandraRow,String>() {
+		javaFunctions(sc).cassandraTable("tracking", "tracking").select("year_month","at","uri").where("year_month = ?", 201502).map(new Function<CassandraRow,String>() {
 
 			@Override
 			public String call(CassandraRow v1) throws Exception {
@@ -44,7 +44,7 @@ public class WordSearch {
 				logger.info(v1.toString());
 				return v1.toString();
 			}
-		}).saveAsTextFile("/spark/wordsearch");
+		}).saveAsTextFile("/spark/wordsearch2");
 //		JavaPairRDD<String, Integer> data = javaFunctions(sc)
 //				.cassandraTable("tracking", "tracking").select("uri")
 //				.filter(new Function<CassandraRow, Boolean>() {
