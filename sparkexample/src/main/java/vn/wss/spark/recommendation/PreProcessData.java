@@ -35,7 +35,7 @@ public class PreProcessData {
 		CassandraJavaRDD<TrackingModel> rawData = javaFunctions(sc)
 				.cassandraTable("tracking", "tracking",
 						mapRowTo(TrackingModel.class)).select("uri", "user_id");
-		logger.info(rawData.count());
+		logger.info("count "+rawData.count());
 		JavaRDD<PModel> data = rawData.filter(
 				new Function<TrackingModel, Boolean>() {
 
