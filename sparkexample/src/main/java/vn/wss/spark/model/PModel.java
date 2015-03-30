@@ -3,10 +3,6 @@ package vn.wss.spark.model;
 import java.io.Serializable;
 
 public class PModel implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1958568280437064389L;
 	private long userID;
 	private long itemID;
 	public PModel() {
