@@ -2,10 +2,16 @@ package vn.websosanh.sparkexample;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -16,12 +22,25 @@ public class asd {
 	@Test
 	public void test() {
 		// fail("Not yet implemented");
-		String s1="CassandraRow{year_month: 201501, at: 2015-01-31 13:06:45+0700, uri: http://websosanh.vn/s/Tai Nghe Nhạc/trang-3.htm}";
-		String s = "CassandraRow{year_month: 201501, at: 2015-01-31 13:06:46+0700, uri: http://websosanh.vn/ban-do-chien-luoc-david-p-norton-robert/1874120356/so-sanh.htm}";
-		String regex=".*, uri: http://websosanh.vn/s/(.*).htm}";
-		Pattern p=Pattern.compile(regex);
-		Matcher m=p.matcher(s1);
-		System.out.println(m.matches());
+		String[] a={"a","a","b"};
+		String[] b={"c","b","b"};
+		List<String> a1=new ArrayList<String>();
+		a1.add("a");
+		a1.add("a");
+		a1.add("b");
+		List<String> a2=new ArrayList<String>();
+		a1.add("c");
+		a1.add("b");
+		a1.add("b");
+		SparkConf conf=new SparkConf(true);
+		JavaSparkContext sc = new JavaSparkContext();
+		JavaRDD<String> c=sc.parallelize(a1);
+		JavaRDD<String> c1=sc.parallelize(a2);
+		a1=c.union(c1).collect();
+		for(String s:a1){
+			System.out.println(s);
+		}
+		
 	}
 
 }

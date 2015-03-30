@@ -6,6 +6,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,63 +31,21 @@ public class WordSearch {
 	private static final Logger logger = LogManager.getLogger(WordSearch.class);
 
 	public static void main(String[] args) {
-		SparkConf conf = new SparkConf(true).set(
-				"spark.cassandra.connection.host", "10.0.0.11");
-
-		JavaSparkContext sc = new JavaSparkContext(conf);
-		JavaRDD<String> data = javaFunctions(sc)
-				.cassandraTable("tracking", "tracking").select("uri")
-				.map(new Function<CassandraRow, String>() {
-
-					@Override
-					public String call(CassandraRow v1) throws Exception {
-						// TODO Auto-generated method stub
-						return v1.getString("uri");
-					}
-				});
-		JavaRDD<String> d1 = data.map(new Function<String, String>() {
-
-			@Override
-			public String call(String v1) throws Exception {
-				// TODO Auto-generated method stub
-				String wordSearch = StringUtils.getWordSearch(v1);
-				if (wordSearch != null) {
-					return wordSearch;
-				}
-				return null;
-			}
-		}).cache();
-		JavaPairRDD<String, Integer> dataMap = d1
-				.mapToPair(new PairFunction<String, String, Integer>() {
-
-					@Override
-					public Tuple2<String, Integer> call(String v1)
-							throws Exception {
-						return new Tuple2<String, Integer>(v1, 1);
-					}
-				});
-		Map<String, Integer> map = dataMap.reduceByKey(
-				new Function2<Integer, Integer, Integer>() {
-
-					@Override
-					public Integer call(Integer v1, Integer v2)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return v1 + v2;
-					}
-				}).collectAsMap();
-		String path = "/home/hdspark/wordsearch";
-
-		File f = new File(path, "wordsearchresult.txt");
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-			for (Entry<String, Integer> e : map.entrySet()) {
-				bw.write(e.getKey() + " " + e.getValue());
-			}
-			bw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		List<String> a1=new ArrayList<String>();
+		a1.add("a");
+		a1.add("a");
+		a1.add("b");
+		List<String> a2=new ArrayList<String>();
+		a1.add("c");
+		a1.add("b");
+		a1.add("b");
+		SparkConf conf=new SparkConf(true);
+		JavaSparkContext sc = new JavaSparkContext();
+		JavaRDD<String> c=sc.parallelize(a1);
+		JavaRDD<String> c1=sc.parallelize(a2);
+		a1=c.union(c1).collect();
+		for(String s:a1){
+			System.out.println(s);
 		}
 		sc.stop();
 	}
