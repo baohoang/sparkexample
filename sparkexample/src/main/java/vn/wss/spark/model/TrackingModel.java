@@ -1,7 +1,6 @@
 package vn.wss.spark.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class TrackingModel implements Serializable{
 	private String uri;

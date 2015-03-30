@@ -31,21 +31,16 @@ public class WordSearch {
 	private static final Logger logger = LogManager.getLogger(WordSearch.class);
 
 	public static void main(String[] args) {
-		List<String> a1=new ArrayList<String>();
-		a1.add("a");
-		a1.add("a");
-		a1.add("b");
-		List<String> a2=new ArrayList<String>();
-		a1.add("c");
-		a1.add("b");
-		a1.add("b");
+		List<Tuple2<Long, Long>> a1=new ArrayList<Tuple2<Long, Long>>();
+		a1.add(new Tuple2<Long, Long>(1L,2L));
+		a1.add(new Tuple2<Long, Long>(2L,3L));
+		a1.add(new Tuple2<Long, Long>(1L,2L));
 		SparkConf conf=new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext();
-		JavaRDD<String> c=sc.parallelize(a1);
-		JavaRDD<String> c1=sc.parallelize(a2);
-		a1=c.union(c1).collect();
-		for(String s:a1){
-			System.out.println(s);
+		JavaPairRDD<Long,Long> c=sc.parallelizePairs(a1);
+		a1=c.distinct().collect();
+		for(Tuple2<Long, Long> s:a1){
+			System.out.println(s._1()+" "+s._2());
 		}
 		sc.stop();
 	}
