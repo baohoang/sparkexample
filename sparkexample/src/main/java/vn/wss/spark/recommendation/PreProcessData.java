@@ -42,7 +42,7 @@ public class PreProcessData {
 					@Override
 					public Boolean call(TrackingModel v1) throws Exception {
 						// TODO Auto-generated method stub
-						return v1.getUser_id() != null
+						return v1.getUser_id() != null && v1.getUri() != null
 								&& v1.getUri().endsWith("so-sanh.htm");
 					}
 				}).map(new Function<TrackingModel, PModel>() {
@@ -63,8 +63,7 @@ public class PreProcessData {
 			}
 		});
 		SQLContext sqlContext = new SQLContext(sc);
-		DataFrame schemaPeople = sqlContext.createDataFrame(data,
-				PModel.class);
+		DataFrame schemaPeople = sqlContext.createDataFrame(data, PModel.class);
 		logger.info("create table completed ...");
 		schemaPeople.saveAsParquetFile("/spark/rawdata/parquet");
 		sc.stop();
