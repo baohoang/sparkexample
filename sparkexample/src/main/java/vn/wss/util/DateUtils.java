@@ -1,7 +1,15 @@
 package vn.wss.util;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+
+import org.joda.time.DateTime;
 
 public class DateUtils {
 	public static Date getYesterday() {
@@ -55,5 +63,21 @@ public class DateUtils {
 		calendar.set(year, month + 1, 1, 0, 0, 0);
 		Date date = calendar.getTime();
 		return date;
+	}
+
+	public static Date readTimeStamp(String arg) throws IOException {
+		File f = new File(arg);
+		BufferedReader br = new BufferedReader(new FileReader(f));
+		String s = br.readLine();
+		DateTime dateTime = new DateTime(Long.valueOf(s));
+		br.close();
+		return dateTime.toDate();
+	}
+
+	public static void saveTimeStamp(Date from, String arg) throws IOException {
+		File f = new File(arg);
+		BufferedWriter bwr = new BufferedWriter(new FileWriter(f));
+		bwr.write(String.valueOf(from.getTime()));
+		bwr.close();
 	}
 }
