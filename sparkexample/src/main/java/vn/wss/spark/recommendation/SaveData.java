@@ -56,9 +56,9 @@ public class SaveData {
 						while (iterator.hasNext()) {
 							list.add(iterator.next());
 						}
+						logger.info(list.size());
 						return new TModel(v1._1(), list);
 					}
-
 				});
 		DataFrame schemaR1 = sqlContext.createDataFrame(r1, TModel.class);
 		Configuration configuration = new Configuration();
@@ -88,6 +88,7 @@ public class SaveData {
 						while (iterator.hasNext()) {
 							list.add(iterator.next());
 						}
+						logger.info(list.size());
 						return new TModel(v1._1(), list);
 					}
 				});
