@@ -19,12 +19,14 @@ import org.apache.spark.sql.SQLContext;
 import vn.wss.spark.model.Visitors;
 
 public class Calculation {
-	private static final Logger logger = LogManager.getLogger(Calculation.class);
+	private static final Logger logger = LogManager
+			.getLogger(Calculation.class);
+
 	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
-		DataFrame rawFrame = sqlContext.load("/spark/typeusers/parquet");
+		DataFrame rawFrame = sqlContext.load("/spark/typeitems/parquet");
 		JavaRDD<Visitors> res = rawFrame.toJavaRDD().map(
 				new Function<Row, Visitors>() {
 
