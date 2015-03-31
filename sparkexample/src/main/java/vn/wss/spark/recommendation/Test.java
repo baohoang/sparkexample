@@ -20,7 +20,7 @@ public class Test {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
-		JavaRDD<String> log = sc.textFile("/log.txt");
+		JavaRDD<String> log = sc.textFile("/log.txt",1);
 		Configuration configuration = new Configuration();
 		FileSystem hdfs = FileSystem.get(URI.create("hdfs://master:9000"),
 				configuration);
