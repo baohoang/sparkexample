@@ -2,16 +2,17 @@ package vn.wss.spark.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TypeUsers implements Serializable {
 	private long itemid;
-	private ArrayList<Long> listUsers;
+	private List<Long> listUsers;
 
 	public TypeUsers() {
 		listUsers = new ArrayList<>();
 	}
 
-	public TypeUsers(long itemid, ArrayList<Long> listUsers) {
+	public TypeUsers(long itemid, List<Long> listUsers) {
 		this.itemid = itemid;
 		this.listUsers = listUsers;
 	}
@@ -24,11 +25,11 @@ public class TypeUsers implements Serializable {
 		this.itemid = itemid;
 	}
 
-	public ArrayList<Long> getListUsers() {
+	public List<Long> getListUsers() {
 		return listUsers;
 	}
 
-	public void setListUsers(ArrayList<Long> listUsers) {
+	public void setListUsers(List<Long> listUsers) {
 		this.listUsers = listUsers;
 	}
 

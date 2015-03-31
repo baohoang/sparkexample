@@ -53,7 +53,7 @@ public class SaveData {
 					public TypeItems call(Tuple2<Long, Iterable<Long>> v1)
 							throws Exception {
 						// TODO Auto-generated method stub
-						ArrayList<Long> list = new ArrayList<Long>();
+						List<Long> list = new ArrayList<Long>();
 						Iterator<Long> iterator = v1._2().iterator();
 						while (iterator.hasNext()) {
 							list.add(iterator.next());
@@ -85,7 +85,7 @@ public class SaveData {
 					public TypeUsers call(Tuple2<Long, Iterable<Long>> v1)
 							throws Exception {
 						// TODO Auto-generated method stub
-						ArrayList<Long> list = new ArrayList<Long>();
+						List<Long> list = new ArrayList<Long>();
 						Iterator<Long> iterator = v1._2().iterator();
 						while (iterator.hasNext()) {
 							list.add(iterator.next());
