@@ -22,9 +22,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 
 import scala.Tuple2;
-import vn.wss.spark.model.PModel;
-import vn.wss.spark.model.TypeItems;
-import vn.wss.spark.model.TypeUsers;
+import vn.wss.spark.model.TModel;
 
 public class SaveData {
 
@@ -46,11 +44,11 @@ public class SaveData {
 						return new Tuple2<Long, Long>(key, val);
 					}
 				});
-		JavaRDD<TypeItems> r1 = r.groupByKey().map(
-				new Function<Tuple2<Long, Iterable<Long>>, TypeItems>() {
+		JavaRDD<TModel> r1 = r.groupByKey().map(
+				new Function<Tuple2<Long, Iterable<Long>>, TModel>() {
 
 					@Override
-					public TypeItems call(Tuple2<Long, Iterable<Long>> v1)
+					public TModel call(Tuple2<Long, Iterable<Long>> v1)
 							throws Exception {
 						// TODO Auto-generated method stub
 						List<Long> list = new ArrayList<Long>();
@@ -58,11 +56,11 @@ public class SaveData {
 						while (iterator.hasNext()) {
 							list.add(iterator.next());
 						}
-						return new TypeItems(v1._1(), list);
+						return new TModel(v1._1(), list);
 					}
 
 				});
-		DataFrame schemaR1 = sqlContext.createDataFrame(r1, TypeItems.class);
+		DataFrame schemaR1 = sqlContext.createDataFrame(r1, TModel.class);
 		Configuration configuration = new Configuration();
 		FileSystem hdfs = FileSystem.get(URI.create("hdfs://master:9000"),
 				configuration);
@@ -70,7 +68,7 @@ public class SaveData {
 			hdfs.delete(new Path("/spark/typeitems/parquet"), true);
 		}
 		schemaR1.saveAsParquetFile("/spark/typeitems/parquet");
-		JavaRDD<TypeUsers> r2 = r
+		JavaRDD<TModel> r2 = r
 				.mapToPair(new PairFunction<Tuple2<Long, Long>, Long, Long>() {
 
 					@Override
@@ -80,9 +78,9 @@ public class SaveData {
 						return new Tuple2<Long, Long>(v1._2(), v1._1());
 					}
 				}).groupByKey()
-				.map(new Function<Tuple2<Long, Iterable<Long>>, TypeUsers>() {
+				.map(new Function<Tuple2<Long, Iterable<Long>>, TModel>() {
 					@Override
-					public TypeUsers call(Tuple2<Long, Iterable<Long>> v1)
+					public TModel call(Tuple2<Long, Iterable<Long>> v1)
 							throws Exception {
 						// TODO Auto-generated method stub
 						List<Long> list = new ArrayList<Long>();
@@ -90,10 +88,10 @@ public class SaveData {
 						while (iterator.hasNext()) {
 							list.add(iterator.next());
 						}
-						return new TypeUsers(v1._1(), list);
+						return new TModel(v1._1(), list);
 					}
 				});
-		DataFrame schemaR2 = sqlContext.createDataFrame(r2, TypeUsers.class);
+		DataFrame schemaR2 = sqlContext.createDataFrame(r2, TModel.class);
 		if (hdfs.exists(new Path("/spark/typeusers/parquet"))) {
 			hdfs.delete(new Path("/spark/typeusers/parquet"), true);
 		}

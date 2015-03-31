@@ -23,19 +23,7 @@ public class asd {
 
 	@Test
 	public void test() {
-		Iterable<Long> t=new Iterable<Long>() {
-			
-			@Override
-			public Iterator<Long> iterator() {
-				// TODO Auto-generated method stub
-				return iterator();
-			}
-		};
-		((List<Long>) t).add(1L);
-		List<Long> x=(List<Long>) t;
-		for (int i = 0; i < x.size(); i++) {
-			System.out.println(x.get(i));
-		}
+		String list="12019, 391283,131283,";
 	}
 
 }
