@@ -26,12 +26,11 @@ import vn.wss.spark.model.TrackingModel;
 import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
 
 public class PreProcessData {
-	private static final Logger logger = LogManager
-			.getLogger(SaveData.class);
+	private static final Logger logger = LogManager.getLogger(SaveData.class);
 
 	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true).set(
-				"spark.cassandra.connection.host", "10.0.0.11");
+				"spark.cassandra.connection.host", args[0]);
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		CassandraJavaRDD<TrackingModel> rawData = javaFunctions(sc)
