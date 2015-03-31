@@ -38,9 +38,9 @@ public class SimilarCalculation {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame rawFrame = sqlContext.load("/spark/typeitems/parquet");
-		System.out.println(rawFrame.count());
-		JavaRDD<SimilarModel> data = rawFrame
-				.toJavaRDD()
+		JavaRDD<Row> rows = rawFrame.toJavaRDD();
+		logger.info(rows.count());
+		JavaRDD<SimilarModel> data = rows
 				.flatMapToPair(new PairFlatMapFunction<Row, Long, Long>() {
 
 					@Override
@@ -50,6 +50,7 @@ public class SimilarCalculation {
 						List<Tuple2<Long, Long>> res = new ArrayList<Tuple2<Long, Long>>();
 						long id = t.getLong(0);
 						String listStr = t.getString(1);
+						logger.info(listStr);
 						TypeModel model = new TModel(id, listStr).convert();
 						List<Long> list = model.getList();
 						for (int i = 0; i < list.size(); i++) {
