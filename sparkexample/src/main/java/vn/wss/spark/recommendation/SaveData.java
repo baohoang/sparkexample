@@ -60,7 +60,7 @@ public class SaveData {
 							s += l + ",";
 						}
 						TModel res = new TModel(v1._1(), s);
-						logger.info(list.size() + " " + res.getList());
+//						logger.info(list.size() + " " + res.getList());
 						return res;
 					}
 				});
@@ -96,7 +96,7 @@ public class SaveData {
 							s += l + ",";
 						}
 						TModel res = new TModel(v1._1(), s);
-						logger.info(list.size() + " " + res.getList());
+//						logger.info(list.size() + " " + res.getList());
 						return res;
 					}
 				});

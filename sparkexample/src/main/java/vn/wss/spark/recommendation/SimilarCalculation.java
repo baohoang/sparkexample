@@ -50,14 +50,21 @@ public class SimilarCalculation {
 						List<Tuple2<Long, Long>> res = new ArrayList<Tuple2<Long, Long>>();
 						long id = t.getLong(0);
 						String listStr = t.getString(1);
-						logger.info(listStr);
+						String[] s = listStr.split(",");
+						logger.info(id + " " + s.length);
 						TypeModel model = new TModel(id, listStr).convert();
 						List<Long> list = model.getList();
-						for (int i = 0; i < list.size(); i++) {
-							for (int j = i + 1; j < list.size(); j++) {
-								long a = Math.max(list.get(i), list.get(j));
-								long b = Math.min(list.get(i), list.get(j));
-								res.add(new Tuple2<Long, Long>(b, a));
+						for (int i = 0; i < s.length; i++) {
+							long a = Long.parseLong(s[i]);
+							for (int j = i + 1; j < s.length; j++) {
+								long b = Long.parseLong(s[j]);
+								if (a > b) {
+									res.add(new Tuple2<Long, Long>(b, a));
+								} else {
+									if (a < b) {
+										res.add(new Tuple2<Long, Long>(a, b));
+									}
+								}
 							}
 						}
 						return res;
