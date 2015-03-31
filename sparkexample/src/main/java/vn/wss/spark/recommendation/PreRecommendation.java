@@ -38,83 +38,64 @@ public class PreRecommendation {
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
 		DataFrame similarsFrame = sqlContext.load("/spark/similars/parquet");
-		JavaPairRDD<Long, RModel> addC = similarsFrame.toJavaRDD().mapToPair(
-				new PairFunction<Row, Long, RModel>() {
+		JavaPairRDD<Long, Tuple2<Long, Integer>> addC = similarsFrame
+				.toJavaRDD().mapToPair(
+						new PairFunction<Row, Long, Tuple2<Long, Integer>>() {
+
+							@Override
+							public Tuple2<Long, Tuple2<Long, Integer>> call(
+									Row v1) throws Exception {
+								// TODO Auto-generated method stub
+								logger.info(v1.toString());
+								return new Tuple2<Long, Tuple2<Long, Integer>>(
+										v1.getLong(0),
+										new Tuple2<Long, Integer>(
+												v1.getLong(1), v1.getInt(2)));
+							}
+						});
+		JavaPairRDD<Long, Integer> addA = visitorsFrame.toJavaRDD().mapToPair(
+				new PairFunction<Row, Long, Integer>() {
 
 					@Override
-					public Tuple2<Long, RModel> call(Row v1) throws Exception {
+					public Tuple2<Long, Integer> call(Row v1) throws Exception {
 						// TODO Auto-generated method stub
 						logger.info(v1.toString());
-						RModel model = new RModel(v1.getLong(0), v1.getLong(1),
-								-1, -1, v1.getInt(2));
-						return new Tuple2<Long, RModel>(v1.getLong(0), model);
-					}
-				});
-		JavaPairRDD<Long, RModel> addA = visitorsFrame.toJavaRDD().mapToPair(
-				new PairFunction<Row, Long, RModel>() {
-
-					@Override
-					public Tuple2<Long, RModel> call(Row v1) throws Exception {
-						// TODO Auto-generated method stub
-						logger.info(v1.toString());
-						RModel model = new RModel(v1.getLong(0), -1L, v1
-								.getInt(1), -1, -1);
-						return new Tuple2<Long, RModel>(v1.getLong(0), model);
-					}
-				});
-		JavaPairRDD<Long, RModel> addB = visitorsFrame.toJavaRDD().mapToPair(
-				new PairFunction<Row, Long, RModel>() {
-
-					@Override
-					public Tuple2<Long, RModel> call(Row v1) throws Exception {
-						// TODO Auto-generated method stub
-						logger.info(v1.toString());
-						RModel model = new RModel(-1L, v1.getLong(0), -1, v1
-								.getInt(1), -1);
-						return new Tuple2<Long, RModel>(v1.getLong(0), model);
+						return new Tuple2<Long, Integer>(v1.getLong(0), v1
+								.getInt(1));
 					}
 				});
 		JavaRDD<RModel> rate = addC
-				.union(addA)
-				.reduceByKey(new Function2<RModel, RModel, RModel>() {
-
-					@Override
-					public RModel call(RModel v1, RModel v2) throws Exception {
-						// TODO Auto-generated method stub
-						long itemId = Math.max(v1.getItemId(), v2.getItemId());
-						long similarId = Math.max(v1.getSimilarId(),
-								v2.getSimilarId());
-						int a = Math.max(v1.getA(), v2.getA());
-						int b = Math.max(v1.getB(), v2.getB());
-						int c = Math.max(v1.getC(), v2.getC());
-						return new RModel(itemId, similarId, a, b, c);
-					}
-				})
+				.join(addA)
 				.mapToPair(
-						new PairFunction<Tuple2<Long, RModel>, Long, RModel>() {
+						new PairFunction<Tuple2<Long, Tuple2<Tuple2<Long, Integer>, Integer>>, Long, RModel>() {
 
 							@Override
 							public Tuple2<Long, RModel> call(
-									Tuple2<Long, RModel> t) throws Exception {
+									Tuple2<Long, Tuple2<Tuple2<Long, Integer>, Integer>> v)
+									throws Exception {
 								// TODO Auto-generated method stub
-								return new Tuple2<Long, RModel>(t._2()
-										.getSimilarId(), t._2());
+								long itemId = v._1();
+								long similarId = v._2()._1()._1();
+								int a = v._2()._2();
+								int c = v._2()._1()._2();
+								RModel model = new RModel(itemId, similarId, a,
+										-1, c);
+								return new Tuple2<Long, RModel>(similarId,
+										model);
 							}
-						}).union(addB)
-				.reduceByKey(new Function2<RModel, RModel, RModel>() {
+						})
+				.join(addA)
+				.map(new Function<Tuple2<Long, Tuple2<RModel, Integer>>, RModel>() {
 
 					@Override
-					public RModel call(RModel v1, RModel v2) throws Exception {
+					public RModel call(Tuple2<Long, Tuple2<RModel, Integer>> v1)
+							throws Exception {
 						// TODO Auto-generated method stub
-						long itemId = Math.max(v1.getItemId(), v2.getItemId());
-						long similarId = Math.max(v1.getSimilarId(),
-								v2.getSimilarId());
-						int a = Math.max(v1.getA(), v2.getA());
-						int b = Math.max(v1.getB(), v2.getB());
-						int c = Math.max(v1.getC(), v2.getC());
-						return new RModel(itemId, similarId, a, b, c);
+						RModel model = v1._2()._1();
+						model.setB(v1._2()._2());
+						return model;
 					}
-				}).values();
+				});
 		DataFrame res = sqlContext.createDataFrame(rate, RModel.class);
 		Configuration configuration = new Configuration();
 		FileSystem hdfs = FileSystem.get(URI.create("hdfs://master:9000"),
