@@ -38,14 +38,13 @@ public class PreRecommendation {
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
 		DataFrame similarsFrame = sqlContext.load("/spark/similars/parquet");
-		logger.info(similarsFrame.count());
-		logger.info(visitorsFrame.count());
 		JavaPairRDD<Long, RModel> addC = similarsFrame.toJavaRDD().mapToPair(
 				new PairFunction<Row, Long, RModel>() {
 
 					@Override
 					public Tuple2<Long, RModel> call(Row v1) throws Exception {
 						// TODO Auto-generated method stub
+						logger.info(v1.toString());
 						RModel model = new RModel(v1.getLong(0), v1.getLong(1),
 								-1, -1, v1.getInt(2));
 						return new Tuple2<Long, RModel>(v1.getLong(0), model);
@@ -57,6 +56,7 @@ public class PreRecommendation {
 					@Override
 					public Tuple2<Long, RModel> call(Row v1) throws Exception {
 						// TODO Auto-generated method stub
+						logger.info(v1.toString());
 						RModel model = new RModel(v1.getLong(0), -1L, v1
 								.getInt(1), -1, -1);
 						return new Tuple2<Long, RModel>(v1.getLong(0), model);
@@ -68,6 +68,7 @@ public class PreRecommendation {
 					@Override
 					public Tuple2<Long, RModel> call(Row v1) throws Exception {
 						// TODO Auto-generated method stub
+						logger.info(v1.toString());
 						RModel model = new RModel(-1L, v1.getLong(0), -1, v1
 								.getInt(1), -1);
 						return new Tuple2<Long, RModel>(v1.getLong(0), model);
