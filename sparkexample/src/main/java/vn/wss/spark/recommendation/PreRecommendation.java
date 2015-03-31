@@ -1,5 +1,11 @@
 package vn.wss.spark.recommendation;
 
+import java.io.IOException;
+import java.net.URI;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -21,7 +27,7 @@ import vn.wss.spark.model.RModel;
 import vn.wss.spark.model.SimilarModel;
 
 public class PreRecommendation {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
@@ -105,6 +111,12 @@ public class PreRecommendation {
 					}
 				}).values();
 		DataFrame res = sqlContext.createDataFrame(rate, RModel.class);
+		Configuration configuration = new Configuration();
+		FileSystem hdfs = FileSystem.get(URI.create("hdfs://master:9000"),
+				configuration);
+		if (hdfs.exists(new Path("/spark/ratings/parquet"))) {
+			hdfs.delete(new Path("/spark/ratings/parquet"), true);
+		}
 		res.saveAsParquetFile("/spark/ratings/parquet");
 		sc.stop();
 	}

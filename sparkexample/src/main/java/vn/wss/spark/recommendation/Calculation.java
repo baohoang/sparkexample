@@ -1,5 +1,13 @@
 package vn.wss.spark.recommendation;
 
+import java.io.IOException;
+import java.net.URI;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -11,7 +19,8 @@ import org.apache.spark.sql.SQLContext;
 import vn.wss.spark.model.Visitors;
 
 public class Calculation {
-	public static void main(String[] args) {
+	private static final Logger logger = LogManager.getLogger(Calculation.class);
+	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
@@ -30,6 +39,13 @@ public class Calculation {
 
 				});
 		DataFrame data = sqlContext.createDataFrame(res, Visitors.class);
+		Configuration configuration = new Configuration();
+		FileSystem hdfs = FileSystem.get(URI.create("hdfs://master:9000"),
+				configuration);
+		if (hdfs.exists(new Path("/spark/visitors/parquet"))) {
+			hdfs.delete(new Path("/spark/visitors/parquet"), true);
+			logger.info("deleted");
+		}
 		data.saveAsParquetFile("/spark/visitors/parquet");
 		sc.stop();
 	}
