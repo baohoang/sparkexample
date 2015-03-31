@@ -6,6 +6,8 @@ import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -27,12 +29,17 @@ import vn.wss.spark.model.RModel;
 import vn.wss.spark.model.SimilarModel;
 
 public class PreRecommendation {
+	private static final Logger logger = LogManager
+			.getLogger(PreRecommendation.class);
+
 	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
 		DataFrame similarsFrame = sqlContext.load("/spark/similars/parquet");
+		logger.info(similarsFrame.count());
+		logger.info(visitorsFrame.count());
 		JavaPairRDD<Long, RModel> addC = similarsFrame.toJavaRDD().mapToPair(
 				new PairFunction<Row, Long, RModel>() {
 
