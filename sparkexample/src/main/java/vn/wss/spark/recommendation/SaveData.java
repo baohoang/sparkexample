@@ -39,8 +39,8 @@ public class SaveData {
 					@Override
 					public Tuple2<Long, Long> call(Row t) throws Exception {
 						// TODO Auto-generated method stub
-						long key = t.getLong(0);
-						long val = t.getLong(1);
+						long key = t.getLong(1);
+						long val = t.getLong(0);
 						return new Tuple2<Long, Long>(key, val);
 					}
 				});

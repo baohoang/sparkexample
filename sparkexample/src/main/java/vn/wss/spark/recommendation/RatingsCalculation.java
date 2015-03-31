@@ -23,8 +23,8 @@ public class RatingsCalculation {
 			@Override
 			public void call(Row t) throws Exception {
 				// TODO Auto-generated method stub
-				logger.info(t.getLong(0) + " " + t.getLong(1) + " "
-						+ t.getInt(2) + " " + t.getInt(3) + " " + t.getInt(4));
+				logger.info(t.getLong(3) + " " + t.getLong(4) + " "
+						+ t.getInt(0) + " " + t.getInt(1) + " " + t.getInt(2));
 			}
 		});
 	}
