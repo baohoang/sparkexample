@@ -18,6 +18,7 @@ public class RatingsCalculation {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame rate = sqlContext.load("/spark/similars/parquet");
+		logger.info("load similar");
 		rate.toJavaRDD().foreach(new VoidFunction<Row>() {
 
 			@Override
