@@ -3,20 +3,16 @@ package vn.wss.spark.model;
 import java.io.Serializable;
 
 public class RModel implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private long itemId;
 	private long similarId;
-	private long a;
-	private long b;
-	private long c;
+	private int a;
+	private int b;
+	private int c;
 
 	public RModel() {
 	}
 
-	public RModel(long itemId, long similarId, long a, long b, long c) {
+	public RModel(long itemId, long similarId, int a, int b, int c) {
 		this.itemId = itemId;
 		this.similarId = similarId;
 		this.a = a;
@@ -47,27 +43,27 @@ public class RModel implements Serializable {
 		this.similarId = similarId;
 	}
 
-	public long getA() {
+	public int getA() {
 		return a;
 	}
 
-	public void setA(long a) {
+	public void setA(int a) {
 		this.a = a;
 	}
 
-	public long getB() {
+	public int getB() {
 		return b;
 	}
 
-	public void setB(long b) {
+	public void setB(int b) {
 		this.b = b;
 	}
 
-	public long getC() {
+	public int getC() {
 		return c;
 	}
 
-	public void setC(long c) {
+	public void setC(int c) {
 		this.c = c;
 	}
 
