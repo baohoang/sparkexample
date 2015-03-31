@@ -37,9 +37,8 @@ public class SimilarCalculation {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
-		DataFrame rawFrame = sqlContext.load("/spark/typeitems/parquet");
+		DataFrame rawFrame = sqlContext.load("/spark/typeusers/parquet");
 		JavaRDD<Row> rows = rawFrame.toJavaRDD();
-		logger.info(rows.count());
 		JavaRDD<SimilarModel> data = rows
 				.flatMapToPair(new PairFlatMapFunction<Row, Long, Long>() {
 
