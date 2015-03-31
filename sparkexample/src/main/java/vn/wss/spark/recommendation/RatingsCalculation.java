@@ -8,6 +8,7 @@ import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.cassandra.CassandraSQLContext;
 
 public class RatingsCalculation {
 	private static final Logger logger = LogManager

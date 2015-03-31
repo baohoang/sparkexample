@@ -30,7 +30,7 @@ public class PreProcessData {
 
 	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true).set(
-				"spark.cassandra.connection.host", args[0]);
+				"spark.cassandra.connection.host", "10.0.0.11");
 
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		CassandraJavaRDD<TrackingModel> rawData = javaFunctions(sc)
