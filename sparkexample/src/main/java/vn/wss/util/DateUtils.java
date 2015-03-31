@@ -20,6 +20,25 @@ public class DateUtils {
 		return c.getTime();
 	}
 
+	public static String dateToString(Date date) {
+		String res = "";
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		// 2015-2-15 23:59:59+0700
+		res += c.get(Calendar.YEAR) + "-";
+		res += (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH);
+		res += " " + c.get(Calendar.HOUR_OF_DAY) + ":";
+		res += c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND);
+		res += "+0700";
+		return res;
+	}
+
+	public static int getYearMonth(Date date) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		return c.get(Calendar.YEAR) * 100 + c.get(Calendar.MONTH) + 1;
+	}
+
 	public static Date addDays(Date date, int days) {
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);

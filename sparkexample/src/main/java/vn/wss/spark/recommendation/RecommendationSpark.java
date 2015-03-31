@@ -24,17 +24,7 @@ public class RecommendationSpark {
 
 	public static JavaPairRDD<Long, Long> calculate(
 			JavaPairRDD<Long, Long> rawData) {
-		JavaPairRDD<Long, Long> userList = rawData
-				.mapToPair(new PairFunction<Tuple2<Long, Long>, Long, Long>() {
-
-					@Override
-					public Tuple2<Long, Long> call(Tuple2<Long, Long> t)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return new Tuple2<Long, Long>(t._2(), t._1());
-					}
-				});
-		JavaPairRDD<Long, Iterable<Long>> userListForItem = userList
+		JavaPairRDD<Long, Iterable<Long>> userListForItem = rawData
 				.groupByKey();
 		JavaPairRDD<Long, Long> countMapper = userListForItem
 				.mapToPair(new PairFunction<Tuple2<Long, Iterable<Long>>, Long, Long>() {
@@ -65,7 +55,16 @@ public class RecommendationSpark {
 
 	public static JavaPairRDD<Tuple2<Long, Long>, Long> calculateSimilar(
 			JavaPairRDD<Long, Long> rawData) {
-		JavaPairRDD<Long, Iterable<Long>> itemListForUser = rawData
+		JavaPairRDD<Long, Long> itemList = rawData
+				.mapToPair(new PairFunction<Tuple2<Long, Long>, Long, Long>() {
+					@Override
+					public Tuple2<Long, Long> call(Tuple2<Long, Long> t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						return new Tuple2<Long, Long>(t._2(), t._1());
+					}
+				});
+		JavaPairRDD<Long, Iterable<Long>> itemListForUser = itemList
 				.groupByKey();
 		JavaPairRDD<Long, Long> similarList = itemListForUser
 				.flatMapToPair(new PairFlatMapFunction<Tuple2<Long, Iterable<Long>>, Long, Long>() {

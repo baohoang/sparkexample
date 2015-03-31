@@ -27,7 +27,7 @@ import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
 
 public class PreProcessData {
 	private static final Logger logger = LogManager
-			.getLogger(CassandraConnection.class);
+			.getLogger(SaveData.class);
 
 	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true).set(
@@ -66,8 +66,6 @@ public class PreProcessData {
 		}).distinct();
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame schemaPeople = sqlContext.createDataFrame(data, PModel.class);
-		logger.info("create table completed ...");
-//		schemaPeople.registerTempTable(tableName);
 		Configuration configuration = new Configuration();
 		FileSystem hdfs = FileSystem.get(URI.create("hdfs://master:9000"),
 				configuration);
@@ -75,8 +73,6 @@ public class PreProcessData {
 			hdfs.delete(new Path("/spark/rawdata/parquet"), true);
 		}
 		schemaPeople.saveAsParquetFile("/spark/rawdata/parquet");
-//		schemaPeople.insertInto(tableName);
-//		schemaPeople.saveAsTable(tableName, mode);
 		sc.stop();
 	}
 }
