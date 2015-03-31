@@ -53,11 +53,13 @@ public class SaveData {
 						// TODO Auto-generated method stub
 						List<Long> list = new ArrayList<Long>();
 						Iterator<Long> iterator = v1._2().iterator();
+						String s = "";
 						while (iterator.hasNext()) {
-							list.add(iterator.next());
+							long l = iterator.next();
+							list.add(l);
+							s += l + ",";
 						}
-
-						TModel res = new TModel(v1._1(), list);
+						TModel res = new TModel(v1._1(), s);
 						logger.info(list.size() + " " + res.getList());
 						return res;
 					}
@@ -87,10 +89,13 @@ public class SaveData {
 						// TODO Auto-generated method stub
 						List<Long> list = new ArrayList<Long>();
 						Iterator<Long> iterator = v1._2().iterator();
+						String s = "";
 						while (iterator.hasNext()) {
-							list.add(iterator.next());
+							long l = iterator.next();
+							list.add(l);
+							s += l + ",";
 						}
-						TModel res = new TModel(v1._1(), list);
+						TModel res = new TModel(v1._1(), s);
 						logger.info(list.size() + " " + res.getList());
 						return res;
 					}
