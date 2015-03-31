@@ -36,7 +36,6 @@ public class Calculation {
 						String[] numOfVisitors = list.split(",");
 						return new Visitors(id, numOfVisitors.length);
 					}
-
 				});
 		DataFrame data = sqlContext.createDataFrame(res, Visitors.class);
 		Configuration configuration = new Configuration();
@@ -44,7 +43,6 @@ public class Calculation {
 				configuration);
 		if (hdfs.exists(new Path("/spark/visitors/parquet"))) {
 			hdfs.delete(new Path("/spark/visitors/parquet"), true);
-			logger.info("deleted");
 		}
 		data.saveAsParquetFile("/spark/visitors/parquet");
 		sc.stop();

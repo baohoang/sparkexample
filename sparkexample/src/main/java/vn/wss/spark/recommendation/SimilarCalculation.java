@@ -30,7 +30,9 @@ import vn.wss.spark.model.TModel;
 import vn.wss.spark.model.TypeModel;
 
 public class SimilarCalculation {
-	private static final Logger logger = LogManager.getLogger(SimilarCalculation.class);
+	private static final Logger logger = LogManager
+			.getLogger(SimilarCalculation.class);
+
 	public static void main(String[] args) throws IOException {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
@@ -51,7 +53,7 @@ public class SimilarCalculation {
 						List<Long> list = model.getList();
 						Collections.sort(list);
 						for (int i = 0; i < list.size(); i++) {
-							for (int j = 0; j < list.size(); j++) {
+							for (int j = i+1; j < list.size(); j++) {
 								res.add(new Tuple2<Long, Long>(list.get(i),
 										list.get(j)));
 							}
@@ -95,7 +97,6 @@ public class SimilarCalculation {
 				configuration);
 		if (hdfs.exists(new Path("/spark/similars/parquet"))) {
 			hdfs.delete(new Path("/spark/similars/parquet"), true);
-			logger.info("deleted");
 		}
 		DataFrame res = sqlContext.createDataFrame(data, SimilarModel.class);
 		res.saveAsParquetFile("/spark/similars/parquet");

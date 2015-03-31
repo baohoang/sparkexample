@@ -31,9 +31,6 @@ public class PreRecommendation {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
-		// DataFrame rawFrame = sqlContext.load("/spark/rawdata/parquet");
-		// DataFrame userFrame = sqlContext.load("/spark/typeitems/parquet");
-		// DataFrame itemFrame = sqlContext.load("/spark/typeitems/parquet");
 		DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
 		DataFrame similarsFrame = sqlContext.load("/spark/similars/parquet");
 		JavaPairRDD<Long, RModel> addC = similarsFrame.toJavaRDD().mapToPair(

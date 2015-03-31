@@ -23,7 +23,9 @@ public class asd {
 
 	@Test
 	public void test() {
-		String list="12019, 391283,131283,";
+		String list="";
+		String[] s=list.split(",");
+		System.out.println(s.length);
 	}
 
 }
