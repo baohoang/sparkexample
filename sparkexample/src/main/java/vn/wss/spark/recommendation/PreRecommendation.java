@@ -46,7 +46,7 @@ public class PreRecommendation {
 							public Tuple2<Long, Tuple2<Long, Integer>> call(
 									Row v1) throws Exception {
 								// TODO Auto-generated method stub
-								logger.info(v1.toString());
+//								logger.info(v1.toString());
 								return new Tuple2<Long, Tuple2<Long, Integer>>(
 										v1.getLong(0),
 										new Tuple2<Long, Integer>(
@@ -59,7 +59,7 @@ public class PreRecommendation {
 					@Override
 					public Tuple2<Long, Integer> call(Row v1) throws Exception {
 						// TODO Auto-generated method stub
-						logger.info(v1.toString());
+//						logger.info(v1.toString());
 						return new Tuple2<Long, Integer>(v1.getLong(0), v1
 								.getInt(1));
 					}
