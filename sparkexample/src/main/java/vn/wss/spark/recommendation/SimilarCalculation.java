@@ -51,11 +51,12 @@ public class SimilarCalculation {
 						String listStr = t.getString(1);
 						TypeModel model = new TModel(id, listStr).convert();
 						List<Long> list = model.getList();
-						Collections.sort(list);
+						// Collections.sort(list);
 						for (int i = 0; i < list.size(); i++) {
-							for (int j = i+1; j < list.size(); j++) {
-								res.add(new Tuple2<Long, Long>(list.get(i),
-										list.get(j)));
+							for (int j = i + 1; j < list.size(); j++) {
+								long a = Math.max(list.get(i), list.get(j));
+								long b = Math.min(list.get(i), list.get(j));
+								res.add(new Tuple2<Long, Long>(b, a));
 							}
 						}
 						return res;
