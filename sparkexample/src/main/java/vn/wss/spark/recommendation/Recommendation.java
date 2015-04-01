@@ -102,7 +102,14 @@ public class Recommendation {
 			}
 		});//lay phan du lieu input moi' hoan toan
 		r1=r1.union(subtract);
-		
+		subtract.foreach(new VoidFunction<PModel>() {
+
+			@Override
+			public void call(PModel t) throws Exception {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 	}
 }
