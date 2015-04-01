@@ -51,6 +51,7 @@ public class WordSearch {
 						nowStr);
 		JavaRDD<String> lazada = sc.textFile("/lazada.txt");
 		String url = "http://websosanh.vn/gionee-gn800-5-5mp-2gb-2-sim-trang/3120163158968901227/direct.htm";
+		System.out.println(rawData.count());
 		JavaPairRDD<String, Integer> lazadaID = lazada
 				.mapToPair(new PairFunction<String, String, Integer>() {
 

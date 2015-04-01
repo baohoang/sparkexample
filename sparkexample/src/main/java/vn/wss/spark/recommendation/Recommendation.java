@@ -70,15 +70,21 @@ public class Recommendation {
 				long itemid = Long.parseLong(itemIDStr);
 				return new PModel(userid, itemid);
 			}
-		}).distinct();//xu li input
+		}).distinct();// xu li input
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame rawFrame = sqlContext.load("/spark/rawdata/parquet");
 		DataFrame similarFrame = sqlContext.load("/spark/similars/parquet");
+		similarFrame.registerTempTable("similar");
 		DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
+		visitorsFrame.registerTempTable("visitor");
 		DataFrame itemsFrame = sqlContext.load("/spark/typeitems/parquet");
+		itemsFrame.registerTempTable("items");
 		DataFrame usersFrame = sqlContext.load("/spark/typeusers/parquet");
+		usersFrame.registerTempTable("users");
 		DataFrame ratingsFrame = sqlContext.load("/spark/ratings/parquet");
+		ratingsFrame.registerTempTable("ratings");
 		DataFrame resultFrame = sqlContext.load("/spark/result/parquet");
+		resultFrame.registerTempTable("result");
 		JavaRDD<PModel> r1 = rawFrame.toJavaRDD().map(
 				new Function<Row, PModel>() {
 
@@ -100,17 +106,17 @@ public class Recommendation {
 				long userid = t.getUserID();
 
 			}
-		});//lay phan du lieu input moi' hoan toan
-		r1=r1.union(subtract);
+		});// lay phan du lieu input moi' hoan toan
+		r1 = r1.union(subtract);
 		subtract.foreach(new VoidFunction<PModel>() {
 
 			@Override
 			public void call(PModel t) throws Exception {
 				// TODO Auto-generated method stub
-				long userID=t.getUserID();
-				long itemID=t.getItemID();
+				long userID = t.getUserID();
+				long itemID = t.getItemID();
 			}
 		});
-		
+
 	}
 }
