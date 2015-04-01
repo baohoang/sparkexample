@@ -49,7 +49,7 @@ public class WordSearch {
 				.select("uri")
 				.where("year_month = ? AND at > ? and at < ?", 201503, fromStr,
 						nowStr);
-		JavaRDD<String> lazada = sc.textFile("lazada.txt");
+		JavaRDD<String> lazada = sc.textFile("/lazada.txt");
 		String url = "http://websosanh.vn/gionee-gn800-5-5mp-2gb-2-sim-trang/3120163158968901227/direct.htm";
 		JavaPairRDD<String, Integer> lazadaID = lazada
 				.mapToPair(new PairFunction<String, String, Integer>() {
