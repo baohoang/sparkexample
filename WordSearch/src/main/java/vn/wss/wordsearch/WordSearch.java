@@ -42,8 +42,8 @@ public class WordSearch {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		String fromStr = WordSearch.dateToString(new DateTime(2015, 3, 31, 0,
 				0, 0).toDate());
-		String nowStr = WordSearch.dateToString(new DateTime(2015, 4, 1, 0, 0,
-				0).toDate());
+		String nowStr = WordSearch.dateToString(new DateTime(2015, 3, 31, 23,
+				59, 59).toDate());
 		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
 				.cassandraTable("tracking", "tracking")
 				.select("uri")
