@@ -70,6 +70,9 @@ public class WordSearch {
 						// TODO Auto-generated method stub
 						String uri = v1.getString("uri");
 						logger.info(uri);
+						if (uri == null) {
+							return false;
+						}
 						return uri.endsWith("/direct.htm");
 					}
 				})
