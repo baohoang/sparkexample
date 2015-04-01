@@ -1,12 +1,16 @@
 package vn.wss.wordsearch;
 
 import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
+import static com.datastax.spark.connector.japi.CassandraJavaUtil.mapRowTo;
+import static com.datastax.spark.connector.japi.CassandraJavaUtil.mapColumnTo;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,6 +24,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.joda.time.DateTime;
 
 import scala.Tuple2;
 import tachyon.thrift.WorkerService.Processor.returnSpace;
@@ -31,17 +36,85 @@ public class WordSearch {
 	private static final Logger logger = LogManager.getLogger(WordSearch.class);
 
 	public static void main(String[] args) {
-		List<Tuple2<Long, Long>> a1=new ArrayList<Tuple2<Long, Long>>();
-		a1.add(new Tuple2<Long, Long>(1L,2L));
-		a1.add(new Tuple2<Long, Long>(2L,3L));
-		a1.add(new Tuple2<Long, Long>(1L,2L));
-		SparkConf conf=new SparkConf(true);
+		SparkConf conf = new SparkConf(true).set(
+				"spark.cassandra.connection.host", "10.0.0.11");
 		JavaSparkContext sc = new JavaSparkContext();
-		JavaPairRDD<Long,Long> c=sc.parallelizePairs(a1);
-		a1=c.distinct().collect();
-		for(Tuple2<Long, Long> s:a1){
-			System.out.println(s._1()+" "+s._2());
-		}
+		String fromStr = WordSearch.dateToString(new DateTime(2015, 3, 31, 0,
+				0, 0).toDate());
+		String nowStr = WordSearch.dateToString(new DateTime(2015, 4, 1, 0, 0,
+				0).toDate());
+		CassandraJavaRDD<String> rawData = javaFunctions(sc)
+				.cassandraTable("tracking", "tracking",
+						mapColumnTo(String.class))
+				.select("uri")
+				.where("year_month = ? AND at > ? and at < ?", 201503, fromStr,
+						nowStr);
+		JavaRDD<String> lazada = sc.textFile("lazada.txt");
+		String url = "http://websosanh.vn/gionee-gn800-5-5mp-2gb-2-sim-trang/3120163158968901227/direct.htm";
+		JavaPairRDD<String, Integer> lazadaID = lazada
+				.mapToPair(new PairFunction<String, String, Integer>() {
+
+					@Override
+					public Tuple2<String, Integer> call(String t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						return new Tuple2<String, Integer>(t, 1);
+					}
+				});
+		long count = rawData
+				.filter(new Function<String, Boolean>() {
+
+					@Override
+					public Boolean call(String v1) throws Exception {
+						// TODO Auto-generated method stub
+						return v1.endsWith("/direct.htm");
+					}
+				})
+				.mapToPair(new PairFunction<String, String, Integer>() {
+
+					@Override
+					public Tuple2<String, Integer> call(String t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						String[] s = t.split("/");
+						String key = s[s.length - 2];
+						return new Tuple2<String, Integer>(key, 1);
+					}
+				})
+				.reduceByKey(new Function2<Integer, Integer, Integer>() {
+
+					@Override
+					public Integer call(Integer v1, Integer v2)
+							throws Exception {
+						// TODO Auto-generated method stub
+						return v1 + v2;
+					}
+				})
+				.join(lazadaID)
+				.filter(new Function<Tuple2<String, Tuple2<Integer, Integer>>, Boolean>() {
+
+					@Override
+					public Boolean call(
+							Tuple2<String, Tuple2<Integer, Integer>> v1)
+							throws Exception {
+						// TODO Auto-generated method stub
+						return v1._2()._2() == 1;
+					}
+				}).count();
+		logger.info("Lazada click: " + count);
 		sc.stop();
+	}
+
+	public static String dateToString(Date date) {
+		String res = "";
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		// 2015-2-15 23:59:59+0700
+		res += c.get(Calendar.YEAR) + "-";
+		res += (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH);
+		res += " " + c.get(Calendar.HOUR_OF_DAY) + ":";
+		res += c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND);
+		res += "+0700";
+		return res;
 	}
 }
