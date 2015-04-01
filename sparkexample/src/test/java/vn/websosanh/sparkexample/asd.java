@@ -23,9 +23,12 @@ public class asd {
 
 	@Test
 	public void test() {
-		String list="";
-		String[] s=list.split(",");
-		System.out.println(s.length);
+		String t="http://websosanh.vn/gionee-gn800-5-5mp-2gb-2-sim-trang/3120163158968901227/direct.htm";
+		String v="http://websosanh.vn/connspeed-as3-45-2mp-4gb-2-sim-trang/906698604949226070/direct.htm";
+		
+		String[] s = t.split("/");
+		String key = s[s.length - 2];
+		System.out.println(key);
 	}
 
 }
