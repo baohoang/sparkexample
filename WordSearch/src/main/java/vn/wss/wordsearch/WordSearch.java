@@ -51,7 +51,7 @@ public class WordSearch {
 //		JavaRDD<String> lazada = sc.textFile("/lazada.txt");
 		// String url =
 		// "http://websosanh.vn/gionee-gn800-5-5mp-2gb-2-sim-trang/3120163158968901227/direct.htm";
-		System.out.println(rawData.count());
+//		System.out.println(rawData.count());
 //		JavaPairRDD<String, Integer> lazadaID = lazada
 //				.mapToPair(new PairFunction<String, String, Integer>() {
 //
@@ -69,7 +69,7 @@ public class WordSearch {
 					public Boolean call(CassandraRow v1) throws Exception {
 						// TODO Auto-generated method stub
 						String uri = v1.getString("uri");
-						logger.info(uri);
+//						logger.info(uri);
 						if (uri == null) {
 							return false;
 						}
