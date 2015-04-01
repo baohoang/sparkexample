@@ -38,14 +38,14 @@ public class WordSearch {
 	public static void main(String[] args) {
 		SparkConf conf = new SparkConf(true).set(
 				"spark.cassandra.connection.host", "10.0.0.11");
-		JavaSparkContext sc = new JavaSparkContext();
+
+		JavaSparkContext sc = new JavaSparkContext(conf);
 		String fromStr = WordSearch.dateToString(new DateTime(2015, 3, 31, 0,
 				0, 0).toDate());
 		String nowStr = WordSearch.dateToString(new DateTime(2015, 4, 1, 0, 0,
 				0).toDate());
-		CassandraJavaRDD<String> rawData = javaFunctions(sc)
-				.cassandraTable("tracking", "tracking",
-						mapColumnTo(String.class))
+		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
+				.cassandraTable("tracking", "tracking")
 				.select("uri")
 				.where("year_month = ? AND at > ? and at < ?", 201503, fromStr,
 						nowStr);
@@ -62,21 +62,21 @@ public class WordSearch {
 					}
 				});
 		long count = rawData
-				.filter(new Function<String, Boolean>() {
+				.filter(new Function<CassandraRow, Boolean>() {
 
 					@Override
-					public Boolean call(String v1) throws Exception {
+					public Boolean call(CassandraRow v1) throws Exception {
 						// TODO Auto-generated method stub
-						return v1.endsWith("/direct.htm");
+						return v1.getString("uri").endsWith("/direct.htm");
 					}
 				})
-				.mapToPair(new PairFunction<String, String, Integer>() {
+				.mapToPair(new PairFunction<CassandraRow, String, Integer>() {
 
 					@Override
-					public Tuple2<String, Integer> call(String t)
+					public Tuple2<String, Integer> call(CassandraRow t)
 							throws Exception {
 						// TODO Auto-generated method stub
-						String[] s = t.split("/");
+						String[] s = t.getString("uri").split("/");
 						String key = s[s.length - 2];
 						return new Tuple2<String, Integer>(key, 1);
 					}
