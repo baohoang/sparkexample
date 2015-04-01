@@ -45,12 +45,11 @@ public class WordSearch {
 		String nowStr = WordSearch.dateToString(new DateTime(2015, 3, 31, 23,
 				59, 59).toDate());
 		CassandraJavaRDD<CassandraRow> rawData = javaFunctions(sc)
-				.cassandraTable("tracking", "tracking")
-				.select("uri")
-				.where("year_month = ? AND at > ? and at < ?", 201503, fromStr,
-						nowStr);
+				.cassandraTable("tracking", "tracking").where(
+						"year_month = ? AND at > ? and at < ?", 201503,
+						fromStr, nowStr);
 		JavaRDD<String> lazada = sc.textFile("/lazada.txt");
-		String url = "http://websosanh.vn/gionee-gn800-5-5mp-2gb-2-sim-trang/3120163158968901227/direct.htm";
+//		String url = "http://websosanh.vn/gionee-gn800-5-5mp-2gb-2-sim-trang/3120163158968901227/direct.htm";
 		System.out.println(rawData.count());
 		JavaPairRDD<String, Integer> lazadaID = lazada
 				.mapToPair(new PairFunction<String, String, Integer>() {
