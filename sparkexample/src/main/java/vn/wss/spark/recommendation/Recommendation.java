@@ -107,7 +107,8 @@ public class Recommendation {
 			@Override
 			public void call(PModel t) throws Exception {
 				// TODO Auto-generated method stub
-				
+				long userID=t.getUserID();
+				long itemID=t.getItemID();
 			}
 		});
 		
