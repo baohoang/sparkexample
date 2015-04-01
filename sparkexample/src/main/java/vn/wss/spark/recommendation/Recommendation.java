@@ -4,6 +4,7 @@ import static com.datastax.spark.connector.japi.CassandraJavaUtil.javaFunctions;
 import static com.datastax.spark.connector.japi.CassandraJavaUtil.mapRowTo;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.sql.DataFrame;
@@ -30,6 +32,7 @@ public class Recommendation {
 		Date now = new Date();
 		String fromStr = DateUtils.dateToString(from);
 		String nowStr = DateUtils.dateToString(now);
+		DateUtils.saveTimeStamp(now, args[0]);
 		int yearMonth = DateUtils.getYearMonth(now);
 		SparkConf conf = new SparkConf(true).set(
 				"spark.cassandra.connection.host", "10.0.0.11");
@@ -39,7 +42,7 @@ public class Recommendation {
 				.cassandraTable("tracking", "tracking",
 						mapRowTo(TrackingModel.class))
 				.select("uri", "user_id")
-				.where("year_month = ? AND at > ? and at > <", yearMonth,
+				.where("year_month = ? AND at > ? and at < ?", yearMonth,
 						fromStr, nowStr);
 		JavaRDD<TrackingModel> raw = rawData
 				.filter(new Function<TrackingModel, Boolean>() {
@@ -67,31 +70,39 @@ public class Recommendation {
 				long itemid = Long.parseLong(itemIDStr);
 				return new PModel(userid, itemid);
 			}
-		}).distinct();
-		
+		}).distinct();//xu li input
 		SQLContext sqlContext = new SQLContext(sc);
-		DataFrame rawFrame=sqlContext.load("/spark/rawdata/parquet");
-		DataFrame resultFrame=sqlContext.load("/spark/recommendation/rating/parquet");
-		JavaRDD<PModel> r1=rawFrame.toJavaRDD().map(new Function<Row, PModel>() {
+		DataFrame rawFrame = sqlContext.load("/spark/rawdata/parquet");
+		DataFrame similarFrame = sqlContext.load("/spark/similars/parquet");
+		DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
+		DataFrame itemsFrame = sqlContext.load("/spark/typeitems/parquet");
+		DataFrame usersFrame = sqlContext.load("/spark/typeusers/parquet");
+		DataFrame ratingsFrame = sqlContext.load("/spark/ratings/parquet");
+		DataFrame resultFrame = sqlContext.load("/spark/result/parquet");
+		JavaRDD<PModel> r1 = rawFrame.toJavaRDD().map(
+				new Function<Row, PModel>() {
 
-			@Override
-			public PModel call(Row v1) throws Exception {
-				// TODO Auto-generated method stub
-				long key=v1.getLong(0);
-				long val=v1.getLong(1);
-				return new PModel(key, val);
-			}
-		});
-		JavaRDD<PModel> subtract=input.subtract(r1);
+					@Override
+					public PModel call(Row v1) throws Exception {
+						// TODO Auto-generated method stub
+						long key = v1.getLong(0);
+						long val = v1.getLong(1);
+						return new PModel(key, val);
+					}
+				});
+		JavaRDD<PModel> subtract = input.subtract(r1);
 		subtract.foreach(new VoidFunction<PModel>() {
-			
+
 			@Override
 			public void call(PModel t) throws Exception {
 				// TODO Auto-generated method stub
-				long itemid=t.getItemID();
-				long userid=t.getUserID();
-				
+				long itemid = t.getItemID();
+				long userid = t.getUserID();
+
 			}
-		});
+		});//lay phan du lieu input moi' hoan toan
+		r1=r1.union(subtract);
+		
+		
 	}
 }
