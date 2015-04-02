@@ -34,10 +34,16 @@ public class SparkSQLExample {
 		b.add(new Tuple2<Integer, Integer>(0, 1));
 		b.add(new Tuple2<Integer, Integer>(1, 1));
 		b.add(new Tuple2<Integer, Integer>(3, 4));
+		List<Tuple2<Integer, Integer>> c = new ArrayList<Tuple2<Integer, Integer>>();
+		c.add(new Tuple2<Integer, Integer>(0, 1));
+		c.add(new Tuple2<Integer, Integer>(1, 1));
+		c.add(new Tuple2<Integer, Integer>(3, 4));
 		JavaPairRDD<Integer, PModel> x1 = sc.parallelizePairs(a);
 		JavaPairRDD<Integer, Integer> x2 = sc.parallelizePairs(b);
-		logger.info(x1.rightOuterJoin(x2).collectAsMap().toString());
-		logger.info(x1.leftOuterJoin(x2).collectAsMap().toString());
+		JavaPairRDD<Integer, Integer> x3 = sc.parallelizePairs(c);
+		JavaPairRDD<Integer, Integer> x4 = x2.union(x3);
+		logger.info(x2.collectAsMap().toString());
+		logger.info(x4.collectAsMap().toString());
 		// JavaRDD<PModel> x3 = sc.parallelize(a1);
 		// DataFrame dataFrame1=sqlContext.createDataFrame(x3, PModel.class);
 		// // dataFrame1.insertInto("pmodel", true);
