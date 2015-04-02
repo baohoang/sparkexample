@@ -145,7 +145,15 @@ public class Recommendation {
 				SaveMode.Overwrite);
 
 		// update ratings
-//		inputFrame.javaRDD().
+		inputFrame.javaRDD().mapToPair(new PairFunction<Row, Long, Long>() {
+
+			@Override
+			public Tuple2<Long, Long> call(Row t) throws Exception {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		}).rightOuterJoin(other);
+		
 		sc.stop();
 	}
 }

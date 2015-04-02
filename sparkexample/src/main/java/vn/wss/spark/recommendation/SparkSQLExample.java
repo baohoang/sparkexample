@@ -25,18 +25,19 @@ public class SparkSQLExample {
 	public static void main(String[] args) throws InterruptedException {
 		SparkConf conf = new SparkConf();
 		JavaSparkContext sc = new JavaSparkContext(conf);
-		 SQLContext sqlContext = new SQLContext(sc);
-		 List<Tuple2<Integer, PModel>> a = new ArrayList<Tuple2<Integer, PModel>>();
-		 a.add(new Tuple2<Integer, PModel>(0, new PModel(0, 1)));
-		 a.add(new Tuple2<Integer, PModel>(1, new PModel(0, 2)));
-		 a.add(new Tuple2<Integer, PModel>(2, new PModel(0, 3)));
-		 List<Tuple2<Integer, Integer>> b = new ArrayList<Tuple2<Integer,
-		 Integer>>();
-		 b.add(new Tuple2<Integer, Integer>(0, 1));
-		 b.add(new Tuple2<Integer, Integer>(1, 1));
-		 JavaPairRDD<Integer, PModel> x1 = sc.parallelizePairs(a);
-		 JavaPairRDD<Integer, Integer> x2 = sc.parallelizePairs(b);
-		 logger.info(x1.join(x2).collectAsMap().size());
+		SQLContext sqlContext = new SQLContext(sc);
+		List<Tuple2<Integer, PModel>> a = new ArrayList<Tuple2<Integer, PModel>>();
+		a.add(new Tuple2<Integer, PModel>(0, new PModel(0, 1)));
+		a.add(new Tuple2<Integer, PModel>(1, new PModel(0, 2)));
+		a.add(new Tuple2<Integer, PModel>(2, new PModel(0, 3)));
+		List<Tuple2<Integer, Integer>> b = new ArrayList<Tuple2<Integer, Integer>>();
+		b.add(new Tuple2<Integer, Integer>(0, 1));
+		b.add(new Tuple2<Integer, Integer>(1, 1));
+		b.add(new Tuple2<Integer, Integer>(3, 4));
+		JavaPairRDD<Integer, PModel> x1 = sc.parallelizePairs(a);
+		JavaPairRDD<Integer, Integer> x2 = sc.parallelizePairs(b);
+		logger.info(x1.rightOuterJoin(x2).collectAsMap().toString());
+		logger.info(x1.leftOuterJoin(x2).collectAsMap().toString());
 		// JavaRDD<PModel> x3 = sc.parallelize(a1);
 		// DataFrame dataFrame1=sqlContext.createDataFrame(x3, PModel.class);
 		// // dataFrame1.insertInto("pmodel", true);
@@ -65,24 +66,24 @@ public class SparkSQLExample {
 		// //ratingsFrame.registerTempTable("ratings");
 		// DataFrame resultFrame = sqlContext.load("/spark/result/parquet");
 		// resultFrame.printSchema();
-//		Thread thread1 = new Thread(new Runnable() {
-//
-//			@Override
-//			public synchronized void run() {
-//				// TODO Auto-generated method stub
-//				logger.info("thread1");
-//			}
-//		});
-//		Thread thread2 = new Thread(new Runnable() {
-//
-//			@Override
-//			public synchronized void run() {
-//				// TODO Auto-generated method stub
-//				logger.info("thread2");
-//			}
-//		});
-//		thread1.start();
-//		thread2.start();
+		// Thread thread1 = new Thread(new Runnable() {
+		//
+		// @Override
+		// public synchronized void run() {
+		// // TODO Auto-generated method stub
+		// logger.info("thread1");
+		// }
+		// });
+		// Thread thread2 = new Thread(new Runnable() {
+		//
+		// @Override
+		// public synchronized void run() {
+		// // TODO Auto-generated method stub
+		// logger.info("thread2");
+		// }
+		// });
+		// thread1.start();
+		// thread2.start();
 		sc.stop();
 	}
 
