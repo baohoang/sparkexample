@@ -12,7 +12,7 @@ public class SqlServer {
 	public static void main(String[] args) {
 		SparkConf conf = new SparkConf(true);
 
-		conf.setJars(new String[] { "/home/hdspark/jdbc4.jar" });
+		conf.setJars(new String[] { "/home/hdspark/sqljdbc4.jar" });
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		String url = "jdbc:sqlserver://183.91.14.82;databaseName=QT_2";
