@@ -116,6 +116,7 @@ public class Recommendation {
 				long userID = t.getUserID();
 				long itemID = t.getItemID();
 //				sqlContext.sql
+				
 			}
 		});
 

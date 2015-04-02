@@ -43,7 +43,9 @@ public class SparkSQLExample {
 		a.add(new PModel(0, 4));
 		JavaRDD<PModel> x3 = sc.parallelize(a1);
 		DataFrame dataFrame1=sqlContext.createDataFrame(x3, PModel.class);
-		dataFrame1.insertInto("pmodel", true);
+//		dataFrame1.insertInto("pmodel", true);
+		DataFrame d=dataFrame.filter("itemID=3");
+		d.show();
 		sc.stop();
 	}
 
