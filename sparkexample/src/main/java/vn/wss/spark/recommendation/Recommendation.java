@@ -304,6 +304,6 @@ public class Recommendation {
 				SimilarModel.class);
 		similarFrame.save("/spark/similars/parquet", "parquet",
 				SaveMode.Overwrite);
-		
+		sc.stop();
 	}
 }

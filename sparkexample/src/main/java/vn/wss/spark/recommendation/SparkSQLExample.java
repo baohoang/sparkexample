@@ -23,9 +23,9 @@ public class SparkSQLExample {
 			.getLogger(SparkSQLExample.class);
 
 	public static void main(String[] args) throws InterruptedException {
-//		SparkConf conf = new SparkConf();
-//		JavaSparkContext sc = new JavaSparkContext(conf);
-//		SQLContext sqlContext = new SQLContext(sc);
+		SparkConf conf = new SparkConf();
+		JavaSparkContext sc = new JavaSparkContext(conf);
+		// SQLContext sqlContext = new SQLContext(sc);
 		// List<PModel> a = new ArrayList<PModel>();
 		// a.add(new PModel(0, 1));
 		// a.add(new PModel(0, 2));
@@ -73,30 +73,22 @@ public class SparkSQLExample {
 		Thread thread1 = new Thread(new Runnable() {
 
 			@Override
-			public void run() {
+			public synchronized void run() {
 				// TODO Auto-generated method stub
-				SparkConf conf = new SparkConf(true);
-				JavaSparkContext sc = new JavaSparkContext(conf);
 				logger.info("thread1");
-				sc.stop();
 			}
 		});
 		Thread thread2 = new Thread(new Runnable() {
 
 			@Override
-			public void run() {
+			public synchronized void run() {
 				// TODO Auto-generated method stub
-				SparkConf conf = new SparkConf(true);
-				JavaSparkContext sc = new JavaSparkContext(conf);
 				logger.info("thread2");
-				sc.stop();
 			}
 		});
 		thread1.start();
-		Thread.sleep(1000);
-		System.out.println("sleeped ...");
 		thread2.start();
-//		sc.stop();
+		sc.stop();
 	}
 
 }
