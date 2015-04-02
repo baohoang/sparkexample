@@ -38,6 +38,7 @@ public class SparkSQLExample {
 		c.add(new Tuple2<Integer, Integer>(0, 1));
 		c.add(new Tuple2<Integer, Integer>(1, 1));
 		c.add(new Tuple2<Integer, Integer>(3, 4));
+		c.add(new Tuple2<Integer, Integer>(3, 5));
 		JavaPairRDD<Integer, PModel> x1 = sc.parallelizePairs(a);
 		JavaPairRDD<Integer, Integer> x2 = sc.parallelizePairs(b);
 		JavaPairRDD<Integer, Integer> x3 = sc.parallelizePairs(c);
