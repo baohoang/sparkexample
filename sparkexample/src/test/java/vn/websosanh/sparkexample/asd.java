@@ -2,6 +2,9 @@ package vn.websosanh.sparkexample;
 
 import static org.junit.Assert.*;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -25,7 +28,19 @@ public class asd {
 
 	@Test
 	public void test() {
-		System.out.println(SQLServerDriver.class.getName());
+		String url = "jdbc:sqlserver://183.91.14.82:1433;database=QT_2";
+		String username = "qt_vn";
+		String password = "@F4sJ=l9/ryJt9MT";
+		try {
+			Class.forName(SQLServerDriver.class.getName());
+			Connection conn = DriverManager.getConnection(url, username,
+					password);
+			
+			System.out.println(conn.getAutoCommit());
+		} catch (SQLException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
