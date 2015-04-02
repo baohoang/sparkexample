@@ -45,7 +45,8 @@ public class SparkSQLExample {
 		DataFrame dataFrame1=sqlContext.createDataFrame(x3, PModel.class);
 //		dataFrame1.insertInto("pmodel", true);
 		DataFrame d=dataFrame.filter("itemID=3");
-		d.insertInto("pmodel");
+		//d.insertInto("pmodel");
+		sqlContext.sql("INSERT INTO pmodel VALUES (3,0)");
 		d=sqlContext.table("pmodel");
 		d.show();
 		sc.stop();
