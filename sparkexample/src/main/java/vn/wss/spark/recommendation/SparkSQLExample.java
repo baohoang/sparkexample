@@ -22,54 +22,81 @@ public class SparkSQLExample {
 	private static final Logger logger = LogManager
 			.getLogger(SparkSQLExample.class);
 
-	public static void main(String[] args) {
-		SparkConf conf = new SparkConf();
-		JavaSparkContext sc = new JavaSparkContext(conf);
-		SQLContext sqlContext = new SQLContext(sc);
-//		List<PModel> a = new ArrayList<PModel>();
-//		a.add(new PModel(0, 1));
-//		a.add(new PModel(0, 2));
-//		a.add(new PModel(0, 3));
-//		List<Tuple2<Integer, Integer>> b = new ArrayList<Tuple2<Integer, Integer>>();
-//		b.add(new Tuple2<Integer, Integer>(0, 1));
-//		b.add(new Tuple2<Integer, Integer>(1, 1));
-//		JavaRDD<PModel> x1 = sc.parallelize(a);
-//		JavaPairRDD<Integer, Integer> x2 = sc.parallelizePairs(b);
-//		DataFrame dataFrame=sqlContext.createDataFrame(x1, PModel.class);
-//		dataFrame.registerTempTable("pmodel");
-//		List<PModel> a1= new ArrayList<PModel>();
-//		a1.add(new PModel(1, 1));
-//		a1.add(new PModel(1, 2));
-//		a.add(new PModel(0, 4));
-//		JavaRDD<PModel> x3 = sc.parallelize(a1);
-//		DataFrame dataFrame1=sqlContext.createDataFrame(x3, PModel.class);
-////		dataFrame1.insertInto("pmodel", true);
-//		DataFrame d=dataFrame.filter("itemID=3");
-//		d.collectAsList();
-		//d.insertInto("pmodel");
-		//sqlContext.sql("INSERT INTO pmodel VALUES (3,0)");
-//		d=sqlContext.table("pmodel");
-//		d.show();
-		DataFrame rawFrame = sqlContext.load("/spark/rawdata/parquet");
-		rawFrame.printSchema();
-		DataFrame similarFrame = sqlContext.load("/spark/similars/parquet");
-		similarFrame.printSchema();
-		//similarFrame.registerTempTable("similar");
-		DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
-		visitorsFrame.printSchema();
-		//visitorsFrame.registerTempTable("visitor");
-		DataFrame itemsFrame = sqlContext.load("/spark/typeitems/parquet");
-		itemsFrame.printSchema();
-		//itemsFrame.registerTempTable("items");
-		DataFrame usersFrame = sqlContext.load("/spark/typeusers/parquet");
-		usersFrame.printSchema();
-		//usersFrame.registerTempTable("users");
-		DataFrame ratingsFrame = sqlContext.load("/spark/ratings/parquet");
-		ratingsFrame.printSchema();
-		//ratingsFrame.registerTempTable("ratings");
-		DataFrame resultFrame = sqlContext.load("/spark/result/parquet");
-		resultFrame.printSchema();
-		sc.stop();
+	public static void main(String[] args) throws InterruptedException {
+//		SparkConf conf = new SparkConf();
+//		JavaSparkContext sc = new JavaSparkContext(conf);
+//		SQLContext sqlContext = new SQLContext(sc);
+		// List<PModel> a = new ArrayList<PModel>();
+		// a.add(new PModel(0, 1));
+		// a.add(new PModel(0, 2));
+		// a.add(new PModel(0, 3));
+		// List<Tuple2<Integer, Integer>> b = new ArrayList<Tuple2<Integer,
+		// Integer>>();
+		// b.add(new Tuple2<Integer, Integer>(0, 1));
+		// b.add(new Tuple2<Integer, Integer>(1, 1));
+		// JavaRDD<PModel> x1 = sc.parallelize(a);
+		// JavaPairRDD<Integer, Integer> x2 = sc.parallelizePairs(b);
+		// DataFrame dataFrame=sqlContext.createDataFrame(x1, PModel.class);
+		// dataFrame.registerTempTable("pmodel");
+		// List<PModel> a1= new ArrayList<PModel>();
+		// a1.add(new PModel(1, 1));
+		// a1.add(new PModel(1, 2));
+		// a.add(new PModel(0, 4));
+		// JavaRDD<PModel> x3 = sc.parallelize(a1);
+		// DataFrame dataFrame1=sqlContext.createDataFrame(x3, PModel.class);
+		// // dataFrame1.insertInto("pmodel", true);
+		// DataFrame d=dataFrame.filter("itemID=3");
+		// d.collectAsList();
+		// d.insertInto("pmodel");
+		// sqlContext.sql("INSERT INTO pmodel VALUES (3,0)");
+		// d=sqlContext.table("pmodel");
+		// d.show();
+		// DataFrame rawFrame = sqlContext.load("/spark/rawdata/parquet");
+		// rawFrame.printSchema();
+		// DataFrame similarFrame = sqlContext.load("/spark/similars/parquet");
+		// similarFrame.printSchema();
+		// //similarFrame.registerTempTable("similar");
+		// DataFrame visitorsFrame = sqlContext.load("/spark/visitors/parquet");
+		// visitorsFrame.printSchema();
+		// //visitorsFrame.registerTempTable("visitor");
+		// DataFrame itemsFrame = sqlContext.load("/spark/typeitems/parquet");
+		// itemsFrame.printSchema();
+		// //itemsFrame.registerTempTable("items");
+		// DataFrame usersFrame = sqlContext.load("/spark/typeusers/parquet");
+		// usersFrame.printSchema();
+		// //usersFrame.registerTempTable("users");
+		// DataFrame ratingsFrame = sqlContext.load("/spark/ratings/parquet");
+		// ratingsFrame.printSchema();
+		// //ratingsFrame.registerTempTable("ratings");
+		// DataFrame resultFrame = sqlContext.load("/spark/result/parquet");
+		// resultFrame.printSchema();
+		Thread thread1 = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				SparkConf conf = new SparkConf(true);
+				JavaSparkContext sc = new JavaSparkContext(conf);
+				logger.info("thread1");
+				sc.stop();
+			}
+		});
+		Thread thread2 = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				SparkConf conf = new SparkConf(true);
+				JavaSparkContext sc = new JavaSparkContext(conf);
+				logger.info("thread2");
+				sc.stop();
+			}
+		});
+		thread1.start();
+		Thread.sleep(1000);
+		System.out.println("sleeped ...");
+		thread2.start();
+//		sc.stop();
 	}
 
 }

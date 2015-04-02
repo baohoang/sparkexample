@@ -56,7 +56,6 @@ public class RatingsCalculation {
 								res.add(new Tuple2<Long, Tuple2<Long, Double>>(
 										id2, new Tuple2<Long, Double>(id1,
 												rating)));
-
 								return res;
 							}
 						})
