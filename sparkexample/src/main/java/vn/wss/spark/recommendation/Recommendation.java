@@ -109,17 +109,6 @@ public class Recommendation {
 					}
 				});
 
-		JavaPairRDD<Long, Integer> visitors = visitorsFrame.toJavaRDD()
-				.mapToPair(new PairFunction<Row, Long, Integer>() {
-
-					@Override
-					public Tuple2<Long, Integer> call(Row t) throws Exception {
-						// TODO Auto-generated method stub
-						return new Tuple2<Long, Integer>(t.getLong(0), t
-								.getInt(1));
-					}
-				});
-
 		// get input
 		JavaPairRDD<Long, String> uis = inputFrame.toJavaRDD().mapToPair(
 				new PairFunction<Row, Long, String>() {
