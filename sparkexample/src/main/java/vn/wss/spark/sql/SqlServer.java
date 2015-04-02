@@ -12,6 +12,7 @@ public class SqlServer {
 	public static void main(String[] args) {
 		SparkConf conf = new SparkConf(true);
 		conf.set("spark.executor.extraClassPath", "/home/hdspark/sqljdbc4.jar");
+		conf.setJars(new String[]{"/home/hdspark/sqljdbc4.jar"});
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
 		
