@@ -152,7 +152,7 @@ public class Recommendation {
 				// TODO Auto-generated method stub
 				return null;
 			}
-		}).rightOuterJoin(other);
+		}).rightOuterJoin(null);
 		
 		sc.stop();
 	}
