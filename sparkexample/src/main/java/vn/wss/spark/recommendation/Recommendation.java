@@ -115,6 +115,7 @@ public class Recommendation {
 				// TODO Auto-generated method stub
 				long userID = t.getUserID();
 				long itemID = t.getItemID();
+				sqlContext.sql
 			}
 		});
 

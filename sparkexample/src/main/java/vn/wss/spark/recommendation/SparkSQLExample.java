@@ -26,38 +26,24 @@ public class SparkSQLExample {
 		SparkConf conf = new SparkConf();
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		SQLContext sqlContext = new SQLContext(sc);
-		List<Tuple2<Integer, PModel>> a = new ArrayList<Tuple2<Integer, PModel>>();
-		a.add(new Tuple2<Integer, PModel>(0, new PModel(0, 1)));
-		a.add(new Tuple2<Integer, PModel>(1, new PModel(0, 2)));
-		a.add(new Tuple2<Integer, PModel>(2, new PModel(0, 3)));
+		List<PModel> a = new ArrayList<PModel>();
+		a.add(new PModel(0, 1));
+		a.add(new PModel(0, 2));
+		a.add(new PModel(0, 3));
 		List<Tuple2<Integer, Integer>> b = new ArrayList<Tuple2<Integer, Integer>>();
 		b.add(new Tuple2<Integer, Integer>(0, 1));
 		b.add(new Tuple2<Integer, Integer>(1, 1));
-		JavaPairRDD<Integer, PModel> x1 = sc.parallelizePairs(a);
+		JavaRDD<PModel> x1 = sc.parallelize(a);
 		JavaPairRDD<Integer, Integer> x2 = sc.parallelizePairs(b);
-		JavaPairRDD<Integer, Tuple2<PModel, Integer>> x = x1.join(x2);
-		long count = x
-				.filter(new Function<Tuple2<Integer, Tuple2<PModel, Integer>>, Boolean>() {
-
-					@Override
-					public Boolean call(
-							Tuple2<Integer, Tuple2<PModel, Integer>> v1)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return v1._2()._2() == 1;
-					}
-				}).count();
-		logger.info(count);
-		// DataFrame data = sqlContext.load("/spark/rawdata/parquet");
-		// //get from raw data
-		// data.toJavaRDD().foreach(new VoidFunction<Row>() {
-		//
-		// @Override
-		// public void call(Row t) throws Exception {
-		// // TODO Auto-generated method stub
-		// logger.info(t.toString());
-		// }
-		// });
+		DataFrame dataFrame=sqlContext.createDataFrame(x1, PModel.class);
+		dataFrame.registerTempTable("pmodel");
+		List<PModel> a1= new ArrayList<PModel>();
+		a1.add(new PModel(1, 1));
+		a1.add(new PModel(1, 2));
+		a.add(new PModel(0, 4));
+		JavaRDD<PModel> x3 = sc.parallelize(a1);
+		DataFrame dataFrame1=sqlContext.createDataFrame(x3, PModel.class);
+		dataFrame1.insertInto("pmodel", true);
 		sc.stop();
 	}
 

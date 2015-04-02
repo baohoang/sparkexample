@@ -8,6 +8,8 @@ import javax.persistence.Query;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import vn.wss.spark.model.Rating;
+
 public class SqlDb {
 	private static final Logger log = LogManager.getLogger(SqlDb.class);
 	private static SqlDb _instance = null;
@@ -21,6 +23,32 @@ public class SqlDb {
 			_instance = new SqlDb();
 		}
 		return _instance;
+	}
+
+	public void saveList(List<Rating> list) {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+		RecommendedItem recommendedItem = null;
+		try {
+			entityManager.getTransaction().begin();
+			for (int i = 0; i < list.size(); i++) {
+				long idItem = list.get(i).getId1();
+				long idRecommendedItem = list.get(i).getId2();
+				int order = list.get(i).getOrder();
+				recommendedItem = new RecommendedItem(idItem,
+						idRecommendedItem, order);
+				recommendedItem = entityManager.merge(recommendedItem);
+			}
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			log.error("ex when save proper noun: " + e);
+			// entityManager.getTransaction().rollback();
+		} finally {
+			if (entityManager != null) {
+				if (entityManager.getTransaction().isActive())
+					entityManager.getTransaction().rollback();
+				entityManager.close();
+			}
+		}
 	}
 
 	public RecommendedItem saveRecommendedItem(long idItem,
