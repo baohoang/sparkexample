@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="Product_Relation"
+		transaction-type="RESOURCE_LOCAL">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<class>vn.wss.spark.sql.RecommendedItem</class>
+		<properties>
+			<property name="javax.persistence.jdbc.driver"
+				value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+			<property name="javax.persistence.jdbc.url"
+				value="jdbc:sqlserver://183.91.14.82;databaseName=QT_2" />
+			<property name="javax.persistence.jdbc.user" value="qt_vn" />
+			<property name="javax.persistence.jdbc.password" value="@F4sJ=l9/ryJt9MT" />
+			<property name="eclipselink.ddl-generation" value="create-tables" />
+			<property name="eclipselink.ddl-generation.output-mode"
+				value="database" />
+		</properties>
+	</persistence-unit>
+</persistence>

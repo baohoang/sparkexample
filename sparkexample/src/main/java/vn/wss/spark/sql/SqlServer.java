@@ -17,12 +17,8 @@ public class SqlServer {
 		SparkConf conf = new SparkConf(true);
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		// DataFrame dataFrame=sqlContext.createDataFrame(rdd, beanClass);
-		SqlConnection sqlConnection = SqlConnection.getInstance();
-		String sql = "SELECT * FROM dbo.Product_Relation";
-		PreparedStatement preparedStatement = sqlConnection.getConn()
-				.prepareStatement(sql);
-		ResultSet resultSet = preparedStatement.executeQuery();
-		System.out.println(resultSet.getRow());
+		SqlDb sqlDb=SqlDb.getInstance();
+		sqlDb.getSize();
 		sc.stop();
 	}
 }
