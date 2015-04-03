@@ -67,4 +67,18 @@ public class RModel implements Serializable {
 		this.c = c;
 	}
 
+	public RModel addA(RModel a) {
+		RModel res = this;
+		int A = a.getA() + res.getA();
+		res.setA(A);
+		return res;
+	}
+
+	public RModel addC(RModel a) {
+		RModel res = this;
+		int C = a.getC() + res.getC();
+		res.setC(C);
+		return res;
+	}
+
 }

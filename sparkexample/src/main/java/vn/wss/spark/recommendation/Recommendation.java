@@ -24,6 +24,8 @@ import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SaveMode;
 
 import scala.Tuple2;
+import scala.Tuple3;
+import vn.wss.spark.model.NewRModel;
 import vn.wss.spark.model.PModel;
 import vn.wss.spark.model.RModel;
 import vn.wss.spark.model.SModel;
@@ -177,7 +179,7 @@ public class Recommendation {
 						return v1 + v2;
 					}
 				});
-		//add visitor A
+		// add visitor A
 		JavaPairRDD<Long, RModel> r1 = ratingsFrame.javaRDD().mapToPair(
 				new PairFunction<Row, Long, RModel>() {
 
@@ -190,7 +192,7 @@ public class Recommendation {
 						return new Tuple2<Long, RModel>(key, rModel);
 					}
 				});
-		
+
 		JavaPairRDD<Tuple2<Long, Long>, RModel> x1 = r1
 				.join(vis)
 				.mapToPair(
@@ -211,7 +213,7 @@ public class Recommendation {
 										key, val);
 							}
 						});
-		//add visitor B
+		// add visitor B
 		JavaPairRDD<Long, RModel> r2 = ratingsFrame.javaRDD().mapToPair(
 				new PairFunction<Row, Long, RModel>() {
 
@@ -243,7 +245,7 @@ public class Recommendation {
 										key, val);
 							}
 						});
-		//result A&B
+		// result A&B
 		JavaPairRDD<Tuple2<Long, Long>, RModel> r = x1.union(x2).reduceByKey(
 				new Function2<RModel, RModel, RModel>() {
 
@@ -259,7 +261,8 @@ public class Recommendation {
 				});
 
 		// update similar
-		JavaPairRDD<Tuple2<Long, Long>, Integer> rx=reducer.join(uis)
+		JavaPairRDD<Tuple2<Long, Long>, Integer> rx = reducer
+				.join(uis)
 				.flatMapToPair(
 						new PairFlatMapFunction<Tuple2<Long, Tuple2<String, String>>, Tuple2<Long, Long>, Integer>() {
 
@@ -300,7 +303,25 @@ public class Recommendation {
 						return v1 + v2;
 					}
 				});
-//		r.joi
+		// new version
+
+		JavaPairRDD<NewRModel, Tuple3<Integer, Integer, Integer>> rate = ratingsFrame
+				.toJavaRDD()
+				.mapToPair(
+						new PairFunction<Row, NewRModel, Tuple3<Integer, Integer, Integer>>() {
+
+							@Override
+							public Tuple2<NewRModel, Tuple3<Integer, Integer, Integer>> call(
+									Row t) throws Exception {
+								// TODO Auto-generated method stub
+								NewRModel key = new NewRModel(t.getLong(3), t
+										.getLong(4));
+								Tuple3<Integer, Integer, Integer> val = new Tuple3<Integer, Integer, Integer>(
+										t.getInt(0), t.getInt(1), t.getInt(2));
+								return new Tuple2<NewRModel, Tuple3<Integer, Integer, Integer>>(
+										key, val);
+							}
+						}).cache();
 		sc.stop();
 	}
 }

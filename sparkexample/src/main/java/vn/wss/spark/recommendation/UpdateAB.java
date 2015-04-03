@@ -42,7 +42,7 @@ public class UpdateAB {
 				return v1 + v2;
 			}
 		});
-		//update to sql table Visitors
+		//update to table Ratings
 	}
 
 }
