@@ -45,9 +45,12 @@ public class PModel implements Serializable {
 		// TODO Auto-generated method stub
 		int prime = 31;
 		int result = 1;
+		int result1 = 1;
 		result = result * prime + Long.hashCode(userID);
 		result = result * prime + Long.hashCode(itemID);
-		return result;
+		result1 = result1 * prime + Long.hashCode(itemID);
+		result1 = result1 * prime + Long.hashCode(userID);
+		return result * result1;
 	}
 
 }
