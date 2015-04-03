@@ -20,27 +20,36 @@ import org.apache.spark.sql.types.IntegerType;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.microsoft.sqlserver.jdbc.SQLServerDriver;
 
 import vn.wss.util.DateUtils;
 
 public class asd {
+	int i = 0;
 
 	@Test
 	public void test() {
-		String url = "jdbc:sqlserver://183.91.14.82:1433;database=QT_2";
-		String username = "qt_vn";
-		String password = "@F4sJ=l9/ryJt9MT";
-		try {
-			Class.forName(SQLServerDriver.class.getName());
-			Connection conn = DriverManager.getConnection(url, username,
-					password);
-			
-			System.out.println(conn.getAutoCommit());
-		} catch (SQLException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		int a=1;
+		abc name=new abc(a);
+		name.get();
+		System.out.println(a);
+	}
+	class abc{
+		private int a;
+		public abc(int a){
+			this.a=a;
 		}
+		public void get(){
+			this.a+=11;
+		}
+		public int getA() {
+			return a;
+		}
+		public void setA(int a) {
+			this.a = a;
+		}
+		
 	}
 
 }

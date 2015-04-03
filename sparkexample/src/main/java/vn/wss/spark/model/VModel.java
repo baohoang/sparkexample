@@ -2,14 +2,14 @@ package vn.wss.spark.model;
 
 import java.io.Serializable;
 
-public class Visitors implements Serializable {
+public class VModel implements Serializable {
 	private long id;
 	private int numOfVisitors;
 
-	public Visitors() {
+	public VModel() {
 	}
 
-	public Visitors(long id, int numOfVisitors) {
+	public VModel(long id, int numOfVisitors) {
 		this.id = id;
 		this.numOfVisitors = numOfVisitors;
 	}

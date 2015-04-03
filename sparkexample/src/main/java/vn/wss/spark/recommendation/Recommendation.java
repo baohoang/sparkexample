@@ -26,10 +26,10 @@ import org.apache.spark.sql.SaveMode;
 import scala.Tuple2;
 import vn.wss.spark.model.PModel;
 import vn.wss.spark.model.RModel;
-import vn.wss.spark.model.SimilarModel;
+import vn.wss.spark.model.SModel;
 import vn.wss.spark.model.TModel;
 import vn.wss.spark.model.TrackingModel;
-import vn.wss.spark.model.Visitors;
+import vn.wss.spark.model.VModel;
 import vn.wss.util.DateUtils;
 
 import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
@@ -97,6 +97,17 @@ public class Recommendation {
 		rawFrame.save("/spark/rawdata/parquet", "parquet", SaveMode.Overwrite);
 
 		// get resources
+		JavaPairRDD<Long, String> items = itemsFrame.toJavaRDD().mapToPair(
+				new PairFunction<Row, Long, String>() {
+
+					@Override
+					public Tuple2<Long, String> call(Row t) throws Exception {
+						// TODO Auto-generated method stub
+						long id = t.getLong(0);
+						String list = t.getString(1);
+						return new Tuple2<Long, String>(id, list);
+					}
+				});
 		JavaPairRDD<Long, String> users = usersFrame.toJavaRDD().mapToPair(
 				new PairFunction<Row, Long, String>() {
 

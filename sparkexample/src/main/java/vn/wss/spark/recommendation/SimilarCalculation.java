@@ -25,7 +25,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 
 import scala.Tuple2;
-import vn.wss.spark.model.SimilarModel;
+import vn.wss.spark.model.SModel;
 import vn.wss.spark.model.TModel;
 import vn.wss.spark.model.TypeModel;
 
@@ -39,7 +39,7 @@ public class SimilarCalculation {
 		SQLContext sqlContext = new SQLContext(sc);
 		DataFrame rawFrame = sqlContext.load("/spark/typeusers/parquet");
 		JavaRDD<Row> rows = rawFrame.toJavaRDD();
-		JavaRDD<SimilarModel> data = rows
+		JavaRDD<SModel> data = rows
 				.flatMapToPair(new PairFlatMapFunction<Row, Long, Long>() {
 
 					@Override
@@ -89,14 +89,14 @@ public class SimilarCalculation {
 						return v1 + v2;
 					}
 				})
-				.map(new Function<Tuple2<Tuple2<Long, Long>, Integer>, SimilarModel>() {
+				.map(new Function<Tuple2<Tuple2<Long, Long>, Integer>, SModel>() {
 
 					@Override
-					public SimilarModel call(
+					public SModel call(
 							Tuple2<Tuple2<Long, Long>, Integer> v1)
 							throws Exception {
 						// TODO Auto-generated method stub
-						return new SimilarModel(v1._1()._1(), v1._1()._2(), v1
+						return new SModel(v1._1()._1(), v1._1()._2(), v1
 								._2());
 					}
 				});
@@ -106,7 +106,7 @@ public class SimilarCalculation {
 		if (hdfs.exists(new Path("/spark/similars/parquet"))) {
 			hdfs.delete(new Path("/spark/similars/parquet"), true);
 		}
-		DataFrame res = sqlContext.createDataFrame(data, SimilarModel.class);
+		DataFrame res = sqlContext.createDataFrame(data, SModel.class);
 		res.saveAsParquetFile("/spark/similars/parquet");
 		sc.stop();
 	}

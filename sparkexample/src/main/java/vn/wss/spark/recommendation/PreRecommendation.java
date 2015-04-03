@@ -26,7 +26,7 @@ import org.apache.spark.sql.types.DataType;
 import scala.Tuple2;
 import scala.collection.Seq;
 import vn.wss.spark.model.RModel;
-import vn.wss.spark.model.SimilarModel;
+import vn.wss.spark.model.SModel;
 
 public class PreRecommendation {
 	private static final Logger logger = LogManager

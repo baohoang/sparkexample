@@ -2,15 +2,15 @@ package vn.wss.spark.model;
 
 import java.io.Serializable;
 
-public class SimilarModel implements Serializable {
+public class SModel implements Serializable {
 	private long id1;
 	private long id2;
 	private int numOfSimilars;
 
-	public SimilarModel() {
+	public SModel() {
 	}
 
-	public SimilarModel(long id1, long id2, int numOfSimilars) {
+	public SModel(long id1, long id2, int numOfSimilars) {
 		this.id1 = id1;
 		this.id2 = id2;
 		this.numOfSimilars = numOfSimilars;
