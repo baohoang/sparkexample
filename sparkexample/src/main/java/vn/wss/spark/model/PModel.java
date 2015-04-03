@@ -35,7 +35,7 @@ public class PModel implements Serializable {
 		// TODO Auto-generated method stub
 		if (obj instanceof PModel) {
 			PModel d = (PModel) obj;
-			return d.getUserID() == userID && d.getItemID() == itemID;
+			return (d.getUserID() == userID && d.getItemID() == itemID)||(d.getUserID() == itemID && d.getItemID() == userID);
 		}
 		return false;
 	}
