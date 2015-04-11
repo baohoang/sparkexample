@@ -43,8 +43,7 @@ public class NewRModel implements Serializable {
 	public boolean equals(Object obj) {
 		if (obj instanceof NewRModel) {
 			NewRModel other = (NewRModel) obj;
-			return (other.getId1() == id1 && other.getId2() == id2)
-					|| (other.getId1() == id2 && other.getId2() == id1);
+			return (other.getId1() == id1 && other.getId2() == id2);
 		}
 		return false;
 	}

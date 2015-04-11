@@ -5,7 +5,10 @@ import static com.datastax.spark.connector.japi.CassandraJavaUtil.mapRowTo;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +17,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
@@ -28,6 +32,7 @@ import scala.Tuple3;
 import vn.wss.spark.model.NewRModel;
 import vn.wss.spark.model.PModel;
 import vn.wss.spark.model.RModel;
+import vn.wss.spark.model.Rating;
 import vn.wss.spark.model.SModel;
 import vn.wss.spark.model.TModel;
 import vn.wss.spark.model.TrackingModel;
@@ -35,6 +40,7 @@ import vn.wss.spark.model.VModel;
 import vn.wss.util.DateUtils;
 
 import com.datastax.spark.connector.japi.rdd.CassandraJavaRDD;
+import com.google.common.base.Optional;
 
 public class Recommendation {
 	public static void main(String[] args) throws IOException {
@@ -96,48 +102,73 @@ public class Recommendation {
 
 		// update rawData
 		rawFrame = rawFrame.unionAll(inputFrame);
-		rawFrame.save("/spark/rawdata/parquet", "parquet", SaveMode.Overwrite);
+
+		// new version
 
 		// get resources
-		JavaPairRDD<Long, String> items = itemsFrame.toJavaRDD().mapToPair(
+		JavaPairRDD<NewRModel, Integer> tb_similars = similarFrame.toJavaRDD()
+				.mapToPair(new PairFunction<Row, NewRModel, Integer>() {
+
+					@Override
+					public Tuple2<NewRModel, Integer> call(Row t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						NewRModel key = new NewRModel(t.getLong(0), t
+								.getLong(1));
+
+						return new Tuple2<NewRModel, Integer>(key, t.getInt(2));
+					}
+				});
+		JavaPairRDD<NewRModel, RModel> r1 = ratingsFrame.toJavaRDD().mapToPair(
+				new PairFunction<Row, NewRModel, RModel>() {
+
+					@Override
+					public Tuple2<NewRModel, RModel> call(Row t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						long id1 = t.getLong(3);
+						long id2 = t.getLong(4);
+						int a = t.getInt(0);
+						int b = t.getInt(1);
+						int c = t.getInt(2);
+						return new Tuple2<NewRModel, RModel>(new NewRModel(id1,
+								id2), new RModel(id1, id2, a, b, c));
+					}
+				});
+		JavaPairRDD<Long, Integer> tb_visitors = visitorsFrame.toJavaRDD()
+				.mapToPair(new PairFunction<Row, Long, Integer>() {
+
+					@Override
+					public Tuple2<Long, Integer> call(Row t) throws Exception {
+						// TODO Auto-generated method stub
+						return new Tuple2<Long, Integer>(t.getLong(0), t
+								.getInt(1));
+					}
+				});
+
+		JavaPairRDD<Long, String> tb_users = usersFrame.toJavaRDD().mapToPair(
 				new PairFunction<Row, Long, String>() {
 
 					@Override
 					public Tuple2<Long, String> call(Row t) throws Exception {
 						// TODO Auto-generated method stub
-						long id = t.getLong(0);
-						String list = t.getString(1);
-						return new Tuple2<Long, String>(id, list);
+						long key = t.getLong(0);
+						String val = t.getString(1);
+						return new Tuple2<Long, String>(key, val);
 					}
 				});
-		JavaPairRDD<Long, String> users = usersFrame.toJavaRDD().mapToPair(
-				new PairFunction<Row, Long, String>() {
+
+		// update C
+		JavaPairRDD<Long, String> input_v1 = inputFrame.toJavaRDD()
+				.mapToPair(new PairFunction<Row, Long, String>() {
 
 					@Override
 					public Tuple2<Long, String> call(Row t) throws Exception {
 						// TODO Auto-generated method stub
-						long id = t.getLong(0);
-						String list = t.getString(1);
-						return new Tuple2<Long, String>(id, list);
+						return new Tuple2<Long, String>(t.getLong(1), t
+								.getLong(0) + ",");
 					}
-				});
-
-		// get input
-		JavaPairRDD<Long, String> uis = inputFrame.toJavaRDD().mapToPair(
-				new PairFunction<Row, Long, String>() {
-
-					@Override
-					public Tuple2<Long, String> call(Row t) throws Exception {
-						// TODO Auto-generated method stub
-						long iditem = t.getLong(0);
-						long iduser = t.getLong(1);
-						return new Tuple2<Long, String>(iduser, iditem + ",");
-					}
-				});
-
-		// update users
-		JavaPairRDD<Long, String> reducer = users.union(uis).reduceByKey(
-				new Function2<String, String, String>() {
+				}).reduceByKey(new Function2<String, String, String>() {
 
 					@Override
 					public String call(String v1, String v2) throws Exception {
@@ -145,150 +176,37 @@ public class Recommendation {
 						return v1 + v2;
 					}
 				});
-		JavaRDD<TModel> userFinal = reducer
-				.map(new Function<Tuple2<Long, String>, TModel>() {
-
-					@Override
-					public TModel call(Tuple2<Long, String> v1)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return new TModel(v1._1(), v1._2());
-					}
-				});
-		usersFrame = sqlContext.createDataFrame(userFinal, TModel.class);
-		usersFrame.save("/spark/typeusers/parquet", "parquet",
-				SaveMode.Overwrite);
-
-		// update visitors
-		JavaPairRDD<Long, Integer> vis = inputFrame.javaRDD()
-				.mapToPair(new PairFunction<Row, Long, Integer>() {
-
-					@Override
-					public Tuple2<Long, Integer> call(Row t) throws Exception {
-						// TODO Auto-generated method stub
-						long itemID = t.getLong(0);
-						long userID = t.getLong(1);
-						return new Tuple2<Long, Integer>(itemID, 1);
-					}
-				}).reduceByKey(new Function2<Integer, Integer, Integer>() {
-
-					@Override
-					public Integer call(Integer v1, Integer v2)
-							throws Exception {
-						// TODO Auto-generated method stub
-						return v1 + v2;
-					}
-				});
-		// add visitor A
-		JavaPairRDD<Long, RModel> r1 = ratingsFrame.javaRDD().mapToPair(
-				new PairFunction<Row, Long, RModel>() {
-
-					@Override
-					public Tuple2<Long, RModel> call(Row t) throws Exception {
-						// TODO Auto-generated method stub
-						long key = t.getLong(3);
-						RModel rModel = new RModel(t.getLong(3), t.getLong(4),
-								t.getInt(0), t.getInt(1), t.getInt(2));
-						return new Tuple2<Long, RModel>(key, rModel);
-					}
-				});
-
-		JavaPairRDD<Tuple2<Long, Long>, RModel> x1 = r1
-				.join(vis)
-				.mapToPair(
-						new PairFunction<Tuple2<Long, Tuple2<RModel, Integer>>, Tuple2<Long, Long>, RModel>() {
-
-							@Override
-							public Tuple2<Tuple2<Long, Long>, RModel> call(
-									Tuple2<Long, Tuple2<RModel, Integer>> t)
-									throws Exception {
-								// TODO Auto-generated method stub
-
-								RModel val = t._2()._1();
-								int a = val.getA() + t._2()._2();
-								val.setA(a);
-								Tuple2<Long, Long> key = new Tuple2<Long, Long>(
-										val.getItemId(), val.getSimilarId());
-								return new Tuple2<Tuple2<Long, Long>, RModel>(
-										key, val);
-							}
-						});
-		// add visitor B
-		JavaPairRDD<Long, RModel> r2 = ratingsFrame.javaRDD().mapToPair(
-				new PairFunction<Row, Long, RModel>() {
-
-					@Override
-					public Tuple2<Long, RModel> call(Row t) throws Exception {
-						// TODO Auto-generated method stub
-						long key = t.getLong(4);
-						RModel rModel = new RModel(t.getLong(3), t.getLong(4),
-								t.getInt(0), t.getInt(1), t.getInt(2));
-						return new Tuple2<Long, RModel>(key, rModel);
-					}
-				});
-		JavaPairRDD<Tuple2<Long, Long>, RModel> x2 = r2
-				.join(vis)
-				.mapToPair(
-						new PairFunction<Tuple2<Long, Tuple2<RModel, Integer>>, Tuple2<Long, Long>, RModel>() {
-
-							@Override
-							public Tuple2<Tuple2<Long, Long>, RModel> call(
-									Tuple2<Long, Tuple2<RModel, Integer>> t)
-									throws Exception {
-								// TODO Auto-generated method stub
-								RModel val = t._2()._1();
-								int c = val.getB() + t._2()._2();
-								val.setB(c);
-								Tuple2<Long, Long> key = new Tuple2<Long, Long>(
-										val.getItemId(), val.getSimilarId());
-								return new Tuple2<Tuple2<Long, Long>, RModel>(
-										key, val);
-							}
-						});
-		// result A&B
-		JavaPairRDD<Tuple2<Long, Long>, RModel> r = x1.union(x2).reduceByKey(
-				new Function2<RModel, RModel, RModel>() {
-
-					@Override
-					public RModel call(RModel v1, RModel v2) throws Exception {
-						// TODO Auto-generated method stub
-						RModel rModel = v1;
-						rModel.setA(Math.max(v1.getA(), v2.getA()));
-						rModel.setB(Math.max(v1.getB(), v2.getB()));
-						rModel.setC(Math.max(v1.getC(), v2.getC()));
-						return rModel;
-					}
-				});
-
-		// update similar
-		JavaPairRDD<Tuple2<Long, Long>, Integer> rx = reducer
-				.join(uis)
+		JavaPairRDD<NewRModel, Integer> addSimilar = tb_users
+				.join(input_v1)
 				.flatMapToPair(
-						new PairFlatMapFunction<Tuple2<Long, Tuple2<String, String>>, Tuple2<Long, Long>, Integer>() {
+						new PairFlatMapFunction<Tuple2<Long, Tuple2<String, String>>, NewRModel, Integer>() {
 
 							@Override
-							public Iterable<Tuple2<Tuple2<Long, Long>, Integer>> call(
+							public Iterable<Tuple2<NewRModel, Integer>> call(
 									Tuple2<Long, Tuple2<String, String>> t)
 									throws Exception {
 								// TODO Auto-generated method stub
-								List<Tuple2<Tuple2<Long, Long>, Integer>> res = new ArrayList<Tuple2<Tuple2<Long, Long>, Integer>>();
-								String listString = t._2._1();
-								String[] list = listString.split(",");
-								for (int i = 0; i < list.length; i++) {
-									long a = Long.parseLong(list[i]);
-									for (int j = i + 1; j < list.length; j++) {
+								List<Tuple2<NewRModel, Integer>> res = new ArrayList<>();
+								String[] optional = t._2()._2().split(",");
+								String[] list = t._2()._1().split(",");
+								for (int i = 0; i < optional.length; i++) {
+									long a = Long.parseLong(optional[i]);
+									for (int j = i + 1; j < optional.length; j++) {
+										long b = Long.parseLong(optional[j]);
+										res.add(new Tuple2<NewRModel, Integer>(
+												new NewRModel(a, b), 1));
+										res.add(new Tuple2<NewRModel, Integer>(
+												new NewRModel(b, a), 1));
+									}
+								}
+								for (int i = 0; i < optional.length; i++) {
+									long a = Long.parseLong(optional[i]);
+									for (int j = 0; j < list.length; j++) {
 										long b = Long.parseLong(list[j]);
-										if (a < b) {
-											res.add(new Tuple2<Tuple2<Long, Long>, Integer>(
-													new Tuple2<Long, Long>(a, b),
-													1));
-										} else {
-											if (a > b) {
-												res.add(new Tuple2<Tuple2<Long, Long>, Integer>(
-														new Tuple2<Long, Long>(
-																b, a), 1));
-											}
-										}
+										res.add(new Tuple2<NewRModel, Integer>(
+												new NewRModel(a, b), 1));
+										res.add(new Tuple2<NewRModel, Integer>(
+												new NewRModel(b, a), 1));
 									}
 								}
 								return res;
@@ -303,25 +221,199 @@ public class Recommendation {
 						return v1 + v2;
 					}
 				});
-		// new version
-
-		JavaPairRDD<NewRModel, Tuple3<Integer, Integer, Integer>> rate = ratingsFrame
-				.toJavaRDD()
+		tb_similars = tb_similars
+				.fullOuterJoin(addSimilar)
 				.mapToPair(
-						new PairFunction<Row, NewRModel, Tuple3<Integer, Integer, Integer>>() {
+						new PairFunction<Tuple2<NewRModel, Tuple2<Optional<Integer>, Optional<Integer>>>, NewRModel, Integer>() {
 
 							@Override
-							public Tuple2<NewRModel, Tuple3<Integer, Integer, Integer>> call(
-									Row t) throws Exception {
+							public Tuple2<NewRModel, Integer> call(
+									Tuple2<NewRModel, Tuple2<Optional<Integer>, Optional<Integer>>> t)
+									throws Exception {
 								// TODO Auto-generated method stub
-								NewRModel key = new NewRModel(t.getLong(3), t
-										.getLong(4));
-								Tuple3<Integer, Integer, Integer> val = new Tuple3<Integer, Integer, Integer>(
-										t.getInt(0), t.getInt(1), t.getInt(2));
-								return new Tuple2<NewRModel, Tuple3<Integer, Integer, Integer>>(
-										key, val);
+								Optional<Integer> op1 = t._2()._1();
+								Optional<Integer> op2 = t._2()._2();
+								int ad = 0;
+								if (op1.isPresent()) {
+									ad += op1.get();
+								}
+								if (op2.isPresent()) {
+									ad += op2.get();
+								}
+								return new Tuple2<NewRModel, Integer>(t._1(),
+										ad);
 							}
-						}).cache();
+						});
+
+		// update A, B
+		JavaPairRDD<Long, Integer> addVisitors = input.mapToPair(
+				new PairFunction<PModel, Long, Integer>() {
+
+					@Override
+					public Tuple2<Long, Integer> call(PModel t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						return new Tuple2<Long, Integer>(t.getItemID(), 1);
+					}
+
+				}).reduceByKey(new Function2<Integer, Integer, Integer>() {
+
+			@Override
+			public Integer call(Integer v1, Integer v2) throws Exception {
+				// TODO Auto-generated method stub
+				return v1 + v2;
+			}
+		});
+		tb_visitors = tb_visitors
+				.fullOuterJoin(addVisitors)
+				.mapToPair(
+						new PairFunction<Tuple2<Long, Tuple2<Optional<Integer>, Optional<Integer>>>, Long, Integer>() {
+
+							@Override
+							public Tuple2<Long, Integer> call(
+									Tuple2<Long, Tuple2<Optional<Integer>, Optional<Integer>>> t)
+									throws Exception {
+								// TODO Auto-generated method stub
+								Optional<Integer> op1 = t._2()._1();
+								Optional<Integer> op2 = t._2()._2();
+								int ad = 0;
+								if (op1.isPresent()) {
+									ad += op1.get();
+								}
+								if (op2.isPresent()) {
+									ad += op2.get();
+								}
+								return new Tuple2<Long, Integer>(t._1(), ad);
+							}
+						});
+
+		// update Rating
+		JavaRDD<RModel> rating = r1
+				.fullOuterJoin(addSimilar)
+				.mapToPair(
+						new PairFunction<Tuple2<NewRModel, Tuple2<Optional<RModel>, Optional<Integer>>>, Long, RModel>() {
+
+							@Override
+							public Tuple2<Long, RModel> call(
+									Tuple2<NewRModel, Tuple2<Optional<RModel>, Optional<Integer>>> t)
+									throws Exception {
+								// TODO Auto-generated method stub
+								RModel model = null;
+								if (t._2()._1().isPresent()) {
+									model = t._2()._1().get();
+								} else {
+									model = new RModel(t._1().getId1(), t._1()
+											.getId2(), 0, 0, 0);
+								}
+								int c = 0;
+								if (t._2()._2().isPresent()) {
+									c += t._2()._2().get();
+								}
+								model.setC(c);
+								return new Tuple2<Long, RModel>(
+										t._1().getId1(), model);
+							}
+						})
+				.fullOuterJoin(addVisitors)
+				.mapToPair(
+						new PairFunction<Tuple2<Long, Tuple2<Optional<RModel>, Optional<Integer>>>, Long, RModel>() {
+
+							@Override
+							public Tuple2<Long, RModel> call(
+									Tuple2<Long, Tuple2<Optional<RModel>, Optional<Integer>>> t)
+									throws Exception {
+								// TODO Auto-generated method stub
+								RModel model = null;
+								if (t._2()._1().isPresent()) {
+									model = t._2()._1().get();
+								} else {
+									model = new RModel(t._1(), -1, 0, 0, 0);
+								}
+								int a = 0;
+								if (t._2()._2().isPresent()) {
+									a += t._2()._2().get();
+								}
+								model.setA(a);
+								return new Tuple2<Long, RModel>(model
+										.getSimilarId(), model);
+							}
+						})
+				.fullOuterJoin(addVisitors)
+				.map(new Function<Tuple2<Long, Tuple2<Optional<RModel>, Optional<Integer>>>, RModel>() {
+
+					@Override
+					public RModel call(
+							Tuple2<Long, Tuple2<Optional<RModel>, Optional<Integer>>> t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						RModel model = null;
+						if (t._2()._1().isPresent()) {
+							model = t._2()._1().get();
+						} else {
+							model = new RModel(t._1(), -1, 0, 0, 0);
+						}
+						int a = 0;
+						if (t._2()._2().isPresent()) {
+							a += t._2()._2().get();
+						}
+						model.setA(a);
+						return model;
+					}
+				});
+		ratingsFrame = sqlContext.createDataFrame(rating, PModel.class);
+		JavaRDD<Rating> recommended=rating.mapToPair(
+				new PairFunction<RModel, Long, Tuple2<Long, Double>>() {
+
+					@Override
+					public Tuple2<Long, Tuple2<Long, Double>> call(RModel t)
+							throws Exception {
+						// TODO Auto-generated method stub
+						double rate = t.getC()
+								/ (t.getA() + t.getB() - t.getC());
+						return new Tuple2<Long, Tuple2<Long, Double>>(t
+								.getItemId(), new Tuple2<Long, Double>(t
+								.getSimilarId(), rate));
+					}
+				})
+				.groupByKey()
+				.flatMap(
+						new FlatMapFunction<Tuple2<Long, Iterable<Tuple2<Long, Double>>>, Rating>() {
+
+							@Override
+							public Iterable<Rating> call(
+									Tuple2<Long, Iterable<Tuple2<Long, Double>>> t)
+									throws Exception {
+								long id1 = t._1();
+								// TODO Auto-generated method stub
+								List<Tuple2<Long, Double>> list = new ArrayList<>();
+								Iterator<Tuple2<Long, Double>> it = t._2()
+										.iterator();
+								while (it.hasNext()) {
+									list.add(it.next());
+								}
+								Collections.sort(list,
+										new Comparator<Tuple2<Long, Double>>() {
+
+											@Override
+											public int compare(
+													Tuple2<Long, Double> o1,
+													Tuple2<Long, Double> o2) {
+												// TODO Auto-generated method
+												// stub
+												return o1._2() == o1._2() ? 0
+														: o1._2() < o1._2() ? -1
+																: 1;
+											}
+										});
+								List<Rating> res = new ArrayList<>();
+								int size = Math.min(list.size(), 10);
+								for (int i = 0; i < size; i++) {
+									res.add(new Rating(id1, list.get(i)._1(), i));
+								}
+								return res;
+							}
+						});
+		//save data
 		sc.stop();
 	}
 }
